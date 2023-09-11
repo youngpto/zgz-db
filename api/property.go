@@ -1,8 +1,8 @@
 package api
 
 import (
-	"zgz-db/dto"
-	"zgz-db/service"
+	"github.com/youngpto/zgz-db/dto"
+	"github.com/youngpto/zgz-db/service"
 )
 
 // FindUserHeroTotalProperty 获取玩家六维属性基础值及偏移量

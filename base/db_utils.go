@@ -48,12 +48,12 @@ func InitOrm(opts ...MysqlOption) error {
 	}
 	engine, err := xorm.NewEngine("mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", options.Username, options.Password, options.Ip, options.DBName))
 	if err != nil {
-		fmt.Println("Mysql Orm 初始化失败")
+		fmt.Println("zgz-db-utils 初始化失败")
 		return err
 	}
 	engine.SetMaxIdleConns(5)
 	engine.SetMaxOpenConns(20)
 	Engine = engine
-	fmt.Println("Mysql Orm 初始化成功")
+	fmt.Println("zgz-db-utils 初始化成功")
 	return nil
 }

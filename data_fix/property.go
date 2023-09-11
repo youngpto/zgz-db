@@ -1,8 +1,8 @@
 package data_fix
 
 import (
-	"zgz-db/model"
-	"zgz-db/service"
+	"github.com/youngpto/zgz-db/model"
+	"github.com/youngpto/zgz-db/service"
 )
 
 func FixHeroBaseProperty() {

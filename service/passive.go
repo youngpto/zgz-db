@@ -1,8 +1,8 @@
 package service
 
 import (
-	"zgz-db/base"
-	"zgz-db/model"
+	"github.com/youngpto/zgz-db/base"
+	"github.com/youngpto/zgz-db/model"
 )
 
 func FindAllPassive() []model.Passive {

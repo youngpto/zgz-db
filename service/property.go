@@ -2,9 +2,9 @@ package service
 
 import (
 	"fmt"
+	"github.com/youngpto/zgz-db/base"
+	"github.com/youngpto/zgz-db/model"
 	"xorm.io/builder"
-	"zgz-db/base"
-	"zgz-db/model"
 )
 
 // FindPropertyOffsetByUserAndHero 查询玩家对应英雄的六维偏移值
