@@ -1,4 +1,4 @@
-module zgz-db
+module github.com/youngpto/zgz-db
 
 go 1.16
 
