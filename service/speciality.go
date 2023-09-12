@@ -19,7 +19,7 @@ func InsertSpeciality(speciality []*model.Speciality) {
 	_, _ = base.Engine.Insert(&speciality)
 }
 
-// GetSpecialityResourceIdByKeyID 根据主键Id解析资源ID
+// GetSpecialityResourceIdByKeyID 根据主键Id解析专长资源ID
 func GetSpecialityResourceIdByKeyID(pkId ...int64) ([]enum.HeroSpeciality, error) {
 	if len(pkId) == 0 {
 		return nil, nil
