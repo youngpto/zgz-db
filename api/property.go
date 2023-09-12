@@ -62,3 +62,26 @@ func UpdatePropertyOffset(userId, resourceHeroId int64, property enum.HeroProper
 
 	return result, nil
 }
+
+// ResetPropertyOffset 重置玩家属性加点并返回现有属性值
+func ResetPropertyOffset(userId, resourceHeroId int64) (*dto.UserHeroProperty, error) {
+	result := new(dto.UserHeroProperty)
+	// 先获取英雄表的基础属性和主键id
+	heroInfo, ok := service.FindHeroBaseProperty(resourceHeroId)
+	if !ok {
+		return nil, errors.New("未找到对应英雄")
+	}
+	result.BaseHp += int32(heroInfo.Life)
+	result.BaseSan += int32(heroInfo.Reason)
+	result.BaseStrength += int32(heroInfo.Power)
+	result.BaseAgility += int32(heroInfo.Agile)
+	result.BaseKnowledge += int32(heroInfo.Knowledge)
+	result.BaseWillPower += int32(heroInfo.Will)
+
+	//重置偏移量
+	err := service.ResetPropertyOffset(userId, heroInfo.Id)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

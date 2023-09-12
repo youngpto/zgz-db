@@ -100,6 +100,19 @@ func UpdatePropertyOffsetByType(userId, heroId int64, property enum.HeroProperty
 	return userHeroPropertyOffset, nil
 }
 
+// ResetPropertyOffset 重置玩家属性加点
+func ResetPropertyOffset(userId, heroId int64) error {
+	_, err := base.Engine.Table("user_hero").
+		Where(builder.Eq{"user_id": userId, "hero_id": heroId}).
+		MustCols("life_offset", "reason_offset", "power_offset",
+			"agile_offset", "knowledge_offset", "will_offset").
+		Update(new(model.PropertyOffset))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // FindHeroBaseProperty 查询英雄的基础六维属性
 func FindHeroBaseProperty(resourceHeroId int64) (*model.HeroProperty, bool) {
 	result := new(model.HeroProperty)
