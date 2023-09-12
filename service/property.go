@@ -23,6 +23,37 @@ func FindPropertyOffsetByUserAndHero(userId int64, heroId int64) (*model.Propert
 	return result, ok
 }
 
+func UpdateTotalOffsetToUserHero(userId int64, heroId int64, addNumber int) error {
+	session := base.Engine.NewSession()
+	defer session.Close()
+
+	if err := session.Begin(); err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+
+	// 获取已经存储的总偏移值
+	userHeroPropertyOffset := new(model.PropertyOffset)
+	_, err := session.Table("user_hero").
+		Where(builder.Eq{"user_id": userId, "hero_id": heroId}).
+		Cols("id", "total_offset").
+		Get(userHeroPropertyOffset)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+
+	// 修改总值
+	userHeroPropertyOffset.TotalOffset += addNumber
+	_, err = session.Table("user_hero").
+		ID(userHeroPropertyOffset.Id).
+		Update(userHeroPropertyOffset)
+	if err != nil {
+		return err
+	}
+	return session.Commit()
+}
+
 // UpdatePropertyOffsetByType 更新玩家英雄六维属性的某一项
 func UpdatePropertyOffsetByType(userId, heroId int64, property enum.HeroProperty, isIncr bool) (*model.PropertyOffset, error) {
 	session := base.Engine.NewSession()
