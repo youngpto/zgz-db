@@ -12,5 +12,5 @@ func FindAllPassive() []model.Passive {
 }
 
 func InsertPassive(passive []*model.Passive) {
-	base.Engine.Insert(&passive)
+	_, _ = base.Engine.Insert(&passive)
 }

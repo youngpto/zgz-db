@@ -5,6 +5,7 @@ import (
 	"github.com/youngpto/zgz-db/service"
 )
 
+// FixHeroBaseProperty 修复英雄六维属性
 func FixHeroBaseProperty() {
 	service.UpdateHeroBaseProperty(0, &model.HeroProperty{
 		Life:      6,
