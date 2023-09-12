@@ -57,3 +57,8 @@ func InitOrm(opts ...MysqlOption) error {
 	fmt.Println("zgz-db-utils 初始化成功")
 	return nil
 }
+
+// SetEngine 直接设置引擎
+func SetEngine(engine *xorm.Engine) {
+	Engine = engine
+}
