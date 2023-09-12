@@ -23,6 +23,7 @@ func FindPropertyOffsetByUserAndHero(userId int64, heroId int64) (*model.Propert
 	return result, ok
 }
 
+// UpdateTotalOffsetToUserHero 修改玩家英雄对应的总偏移值
 func UpdateTotalOffsetToUserHero(userId int64, heroId int64, addNumber int) error {
 	session := base.Engine.NewSession()
 	defer session.Close()
