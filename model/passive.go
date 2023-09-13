@@ -34,14 +34,14 @@ func (p *PassiveRule) TableName() string {
 }
 
 type UserPassive struct {
-	Id         int64     `xorm:"pk autoincr"`           // 主键
-	UserId     int64     `xorm:"notnull 'user_id'"`     // 用户ID
-	HeroId     int64     `xorm:"notnull"`               // 调查员编号
-	Level      int       `xorm:"notnull"`               // 层级
-	PassiveId  int64     `xorm:"notnull 'passive_id'"`  // 被动ID
-	UnlockRank int       `xorm:"notnull 'unlock_rank'"` // 解锁等级
-	CreatedAt  time.Time `xorm:"created"`               // 创建时间
-	UpdatedAt  time.Time `xorm:"updated"`               // 修改时间
+	Id        int64     `xorm:"pk autoincr"`                         // 主键
+	UserId    int64     `xorm:"notnull 'user_id'"`                   // 用户ID
+	HeroId    int64     `xorm:"notnull"`                             // 调查员编号
+	Level     int       `xorm:"notnull"`                             // 层级
+	PassiveId int64     `xorm:"notnull 'passive_id'"`                // 被动ID
+	TakeAlong bool      `xorm:"default(false) notnull 'take_along'"` // 是否佩戴
+	CreatedAt time.Time `xorm:"created"`                             // 创建时间
+	UpdatedAt time.Time `xorm:"updated"`                             // 修改时间
 }
 
 func (u *UserPassive) TableName() string {

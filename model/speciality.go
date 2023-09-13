@@ -35,14 +35,14 @@ func (s *SpecialityRule) TableName() string {
 
 // UserSpeciality 玩家配置的专长
 type UserSpeciality struct {
-	Id           int64     `xorm:"pk autoincr"`             // 主键
-	UserId       int64     `xorm:"notnull 'user_id'"`       // 用户ID
-	HeroId       int64     `xorm:"notnull"`                 // 调查员编号
-	Level        int       `xorm:"notnull"`                 // 层级
-	SpecialityId int64     `xorm:"notnull 'speciality_id'"` // 专长ID
-	UnlockRank   int       `xorm:"notnull 'unlock_rank'"`   // 解锁等级
-	CreatedAt    time.Time `xorm:"created"`                 // 创建时间
-	UpdatedAt    time.Time `xorm:"updated"`                 // 修改时间
+	Id           int64     `xorm:"pk autoincr"`                         // 主键
+	UserId       int64     `xorm:"notnull 'user_id'"`                   // 用户ID
+	HeroId       int64     `xorm:"notnull"`                             // 调查员编号
+	Level        int       `xorm:"notnull"`                             // 层级
+	SpecialityId int64     `xorm:"notnull 'speciality_id'"`             // 专长ID
+	TakeAlong    bool      `xorm:"default(false) notnull 'take_along'"` // 是否佩戴
+	CreatedAt    time.Time `xorm:"created"`                             // 创建时间
+	UpdatedAt    time.Time `xorm:"updated"`                             // 修改时间
 }
 
 func (u *UserSpeciality) TableName() string {

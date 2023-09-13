@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-	"fmt"
+	"github.com/go-xorm/xorm"
 	"github.com/youngpto/zgz-db/base"
 	"github.com/youngpto/zgz-db/enum"
 	"github.com/youngpto/zgz-db/model"
@@ -26,45 +26,26 @@ func InsertPassive(passive []*model.Passive) {
 	_, _ = base.Engine.Insert(&passive)
 }
 
-// GetPassiveResourceIdByKeyID 根据主键Id解析被动资源ID
-func GetPassiveResourceIdByKeyID(pkId ...int64) ([]enum.HeroPassive, error) {
-	if len(pkId) == 0 {
-		return nil, nil
-	}
-	session := base.Engine.NewSession()
-	defer session.Close()
-
-	if err := session.Begin(); err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
-	var result []enum.HeroPassive
-	for _, id := range pkId {
-		passive := model.Passive{}
-		_, err := session.ID(id).
-			Cols("resource_id").Get(&passive)
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, enum.HeroPassive(passive.ResourceId))
-	}
-	err := session.Commit()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
 // GetHeroPassiveId 获取被动主键Id
-func GetHeroPassiveId(heroId, resourcePId int) (int64, bool) {
+func GetHeroPassiveId(heroId, resourcePId int) (int64, error) {
 	result := new(model.Passive)
 	_, err := base.Engine.Where(builder.Eq{"hero_id": heroId, "resource_id": resourcePId}).
 		Get(result)
 	if err != nil {
-		return 0, false
+		return 0, err
 	}
-	return result.Id, true
+	return result.Id, nil
+}
+
+// GetHeroPassiveResourceId 根据被动ID解析资源ID
+func GetHeroPassiveResourceId(pkID int64) (enum.HeroPassive, error) {
+	result := new(model.Passive)
+	_, err := base.Engine.ID(pkID).
+		Get(result)
+	if err != nil {
+		return 0, err
+	}
+	return enum.HeroPassive(result.ResourceId), nil
 }
 
 // DropAllPassiveRule 清空被动规则表
@@ -77,71 +58,100 @@ func InsertPassiveRule(batch []*model.PassiveRule) {
 	_, _ = base.Engine.Insert(batch)
 }
 
-// InsertOrUpdateUserPassiveByLevel 插入或更新玩家在确定层级配置的被动
-func InsertOrUpdateUserPassiveByLevel(passive *model.UserPassive) error {
+// InsertNotExistUserPassive 不重复插入玩家被动
+func InsertNotExistUserPassive(session *xorm.Session, passive *model.UserPassive) (bool, error) {
+	insert, err := session.Where(
+		builder.NotExists(builder.
+			Select("id").
+			From("user_passive").
+			Where(builder.Eq{
+				"user_id":    passive.UserId,
+				"level":      passive.Level,
+				"hero_id":    passive.HeroId,
+				"passive_id": passive.PassiveId},
+			)),
+	).Insert(passive)
+	if err != nil {
+		return false, err
+	}
+	return insert > 0, nil
+}
+
+// UpdateTakeAlongFormUserPassiveByLevel 调整玩家在指定层级选中的被动
+func UpdateTakeAlongFormUserPassiveByLevel(passive *model.UserPassive) error {
 	session := base.Engine.NewSession()
 	defer session.Close()
 
 	if err := session.Begin(); err != nil {
-		fmt.Println(err.Error())
 		return err
 	}
-
-	// 校验该层级是否能配置当前选择的被动
-	var rules []model.PassiveRule
-	err := session.Where(builder.Eq{"hero_id": passive.HeroId, "level": passive.Level}).
-		Cols("passive_id").
-		Find(&rules)
+	// 校验该被动是否符合配置规则
+	matchRule, err := session.Where(builder.Eq{
+		"hero_id":    passive.HeroId,
+		"level":      passive.Level,
+		"passive_id": passive.PassiveId,
+	}).Exist(new(model.PassiveRule))
 	if err != nil {
 		return err
 	}
-
-	// 是否匹配上规则限制
-	find := false
-	for _, rule := range rules {
-		if rule.PassiveId == passive.PassiveId {
-			find = true
-			break
-		}
+	if !matchRule {
+		return errors.New("不符合配置规则")
 	}
-	if !find {
-		return errors.New("不允许在当前层级配置的专长")
-	}
-
-	// 检查是否已经配置了该层级的专长
+	// 检查是否已经配置了被动
 	exist, err := session.Table("user_passive").
-		Where(builder.Eq{"user_id": passive.UserId,
-			"hero_id": passive.HeroId,
-			"level":   passive.Level}).
-		Exist()
+		Where(builder.Eq{
+			"user_id":    passive.UserId,
+			"hero_id":    passive.HeroId,
+			"level":      passive.Level,
+			"take_along": true,
+		}).Exist()
 	if err != nil {
 		return err
 	}
-
-	// 有则修改，无则插入
+	// 如果存在的话则取消
 	if exist {
-		_, err := session.Where(builder.Eq{"user_id": passive.UserId,
-			"hero_id": passive.HeroId,
-			"level":   passive.Level}).
-			Cols("passive_id").
-			Update(passive)
+		_, err := session.
+			Where(builder.Eq{
+				"user_id":    passive.UserId,
+				"hero_id":    passive.HeroId,
+				"level":      passive.Level,
+				"take_along": true,
+			}).MustCols("take_along").
+			Update(&model.UserPassive{
+				TakeAlong: false,
+			})
 		if err != nil {
 			return err
 		}
-	} else {
-		_, err := session.Insert(passive)
-		if err != nil {
-			return err
-		}
+
+	}
+	_, err = session.
+		Where(builder.Eq{
+			"user_id":    passive.UserId,
+			"hero_id":    passive.HeroId,
+			"level":      passive.Level,
+			"passive_id": passive.PassiveId,
+		}).MustCols("take_along").
+		Update(&model.UserSpeciality{
+			TakeAlong: true,
+		})
+	if err != nil {
+		return err
 	}
 	return session.Commit()
 }
 
-// FindUserPassiveByUserAndHero 根据用户和英雄获取被动
-func FindUserPassiveByUserAndHero(userId int64, heroId int64) ([]model.UserPassive, error) {
+// FindTakeAlongUserPassiveByUser 获取玩家所有以佩戴的被动
+func FindTakeAlongUserPassiveByUser(userId int64, heroId int64) ([]model.UserPassive, error) {
 	var result []model.UserPassive
-	err := base.Engine.Where(builder.Eq{"user_id": userId, "hero_id": heroId}).
-		Cols("level", "passive_id").
+	err := base.Engine.Where(builder.Eq{
+		"user_id":    userId,
+		"hero_id":    heroId,
+		"take_along": true,
+	}).Cols("level", "passive_id").
 		Find(&result)
-	return result, err
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

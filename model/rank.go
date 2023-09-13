@@ -2,6 +2,20 @@ package model
 
 import "time"
 
+// Rank 升级经验表
+type Rank struct {
+	Id         int64     `xorm:"pk autoincr"`                 // 主键
+	Name       string    `xorm:"varchar(191) notnull 'name'"` // 等级名称
+	Rank       int       `xorm:"notnull 'rank'"`              // 等级
+	Experience float64   `xorm:"notnull 'experience'"`        // 等级升级经验
+	CreatedAt  time.Time `xorm:"created"`                     // 创建时间
+	UpdatedAt  time.Time `xorm:"updated"`                     // 修改时间
+}
+
+func (r *Rank) TableName() string {
+	return "rank"
+}
+
 // HeroUpgradeReward 玩家升级奖励
 type HeroUpgradeReward struct {
 	Id          int64     `xorm:"pk autoincr"`    // 主键
@@ -10,7 +24,7 @@ type HeroUpgradeReward struct {
 	Category    int       `xorm:"notnull"`        // 奖励分类 1专长 2卡牌 3被动  4自定义属性点
 	Type        int       `xorm:"'type'"`         // 特殊分类类型 4自定义属性点(1生命,2理智,3力量,4敏捷,5知识,6意志)
 	ObjectId    int       `xorm:"'object_id'"`    // 对象ID(分类为专长 卡牌 被动时使用)
-	ObjectValue int       `xorm:"'object_value'"` // 对象值(自定义属性点取值该字段)
+	ObjectValue int       `xorm:"'object_value'"` // 对象值(自定义属性点取值该字段)或者是专长或卡牌的层级
 	CreatedAt   time.Time `xorm:"created"`        // 创建时间
 	UpdatedAt   time.Time `xorm:"updated"`        // 修改时间
 }

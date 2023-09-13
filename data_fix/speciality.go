@@ -8,6 +8,7 @@ import (
 	"github.com/youngpto/zgz-db/service"
 )
 
+// RebuildUserSpecial 重建用户专长表
 func RebuildUserSpecial() {
 	service.DropAllUserSpeciality()
 

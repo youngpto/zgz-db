@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-	"fmt"
+	"github.com/go-xorm/xorm"
 	"github.com/youngpto/zgz-db/base"
 	"github.com/youngpto/zgz-db/enum"
 	"github.com/youngpto/zgz-db/model"
@@ -19,45 +19,26 @@ func InsertSpeciality(speciality []*model.Speciality) {
 	_, _ = base.Engine.Insert(&speciality)
 }
 
-// GetSpecialityResourceIdByKeyID 根据主键Id解析专长资源ID
-func GetSpecialityResourceIdByKeyID(pkId ...int64) ([]enum.HeroSpeciality, error) {
-	if len(pkId) == 0 {
-		return nil, nil
-	}
-	session := base.Engine.NewSession()
-	defer session.Close()
-
-	if err := session.Begin(); err != nil {
-		fmt.Println(err.Error())
-		return nil, err
-	}
-
-	var result []enum.HeroSpeciality
-	for _, id := range pkId {
-		speciality := model.Speciality{}
-		_, err := session.ID(id).
-			Cols("resource_id").Get(&speciality)
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, enum.HeroSpeciality(speciality.ResourceId))
-	}
-	err := session.Commit()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
 // GetHeroSpecialityId 获取指定英雄专长ID
-func GetHeroSpecialityId(heroId, resourceSId int) (int64, bool) {
+func GetHeroSpecialityId(heroId, resourceSId int) (int64, error) {
 	result := new(model.Speciality)
 	_, err := base.Engine.Where(builder.Eq{"hero_id": heroId, "resource_id": resourceSId}).
 		Get(result)
 	if err != nil {
-		return 0, false
+		return 0, err
 	}
-	return result.Id, true
+	return result.Id, nil
+}
+
+// GetHeroSpecialityResourceId 根据专长ID解析资源ID
+func GetHeroSpecialityResourceId(pkID int64) (enum.HeroSpeciality, error) {
+	result := new(model.Speciality)
+	_, err := base.Engine.ID(pkID).
+		Get(result)
+	if err != nil {
+		return 0, err
+	}
+	return enum.HeroSpeciality(result.ResourceId), nil
 }
 
 // DropAllSpecialityRule 清空专长规则表
@@ -70,81 +51,110 @@ func InsertSpecialityRule(batch []*model.SpecialityRule) {
 	_, _ = base.Engine.Insert(&batch)
 }
 
-// DropAllUserSpeciality 清空玩家配置的专长表
+// DropAllUserSpeciality 清空玩家的专长表
 func DropAllUserSpeciality() {
 	_, _ = base.Engine.Where("1=1").Delete(new(model.UserSpeciality))
 }
 
-// InsertUserSpeciality 玩家新增专长配置
+// InsertUserSpeciality 玩家新增专长
 func InsertUserSpeciality(batch []*model.UserSpeciality) {
 	_, _ = base.Engine.Insert(&batch)
 }
 
-// InsertOrUpdateUserSpecialityByLevel 插入或更新玩家在确定层级配置的专长
-func InsertOrUpdateUserSpecialityByLevel(speciality *model.UserSpeciality) error {
+// InsertNotExistUserSpeciality 不重复插入玩家专长
+func InsertNotExistUserSpeciality(session *xorm.Session, speciality *model.UserSpeciality) (bool, error) {
+	insert, err := session.Where(
+		builder.NotExists(builder.
+			Select("id").
+			From("user_speciality").
+			Where(builder.Eq{
+				"user_id":       speciality.UserId,
+				"level":         speciality.Level,
+				"hero_id":       speciality.HeroId,
+				"speciality_id": speciality.SpecialityId},
+			)),
+	).Insert(speciality)
+	if err != nil {
+		return false, err
+	}
+	return insert > 0, nil
+}
+
+// UpdateTakeAlongFormUserSpecialityByLevel 调整玩家在指定层级选中的专长
+func UpdateTakeAlongFormUserSpecialityByLevel(speciality *model.UserSpeciality) error {
 	session := base.Engine.NewSession()
 	defer session.Close()
 
 	if err := session.Begin(); err != nil {
-		fmt.Println(err.Error())
 		return err
 	}
-
-	// 校验该层级是否能配置当前选择的专长
-	var rules []model.SpecialityRule
-	err := session.Where(builder.Eq{"hero_id": speciality.HeroId, "level": speciality.Level}).
-		Cols("speciality_id").
-		Find(&rules)
+	// 校验该专长是否符合配置规则
+	matchRule, err := session.Where(builder.Eq{
+		"hero_id":       speciality.HeroId,
+		"level":         speciality.Level,
+		"speciality_id": speciality.SpecialityId,
+	}).Exist(new(model.SpecialityRule))
 	if err != nil {
 		return err
 	}
-
-	// 是否匹配上规则限制
-	find := false
-	for _, rule := range rules {
-		if rule.SpecialityId == speciality.SpecialityId {
-			find = true
-			break
-		}
+	if !matchRule {
+		return errors.New("不符合配置规则")
 	}
-	if !find {
-		return errors.New("不允许在当前层级配置的专长")
-	}
-
-	// 检查是否已经配置了该层级的专长
+	// 检查是否已经配置了专长
 	exist, err := session.Table("user_speciality").
-		Where(builder.Eq{"user_id": speciality.UserId,
-			"hero_id": speciality.HeroId,
-			"level":   speciality.Level}).
-		Exist()
+		Where(builder.Eq{
+			"user_id":    speciality.UserId,
+			"hero_id":    speciality.HeroId,
+			"level":      speciality.Level,
+			"take_along": true,
+		}).Exist()
 	if err != nil {
 		return err
 	}
-
-	// 有则修改，无则插入
+	// 如果存在的话则取消
 	if exist {
-		_, err := session.Where(builder.Eq{"user_id": speciality.UserId,
-			"hero_id": speciality.HeroId,
-			"level":   speciality.Level}).
-			Cols("speciality_id").
-			Update(speciality)
+		_, err := session.
+			Where(builder.Eq{
+				"user_id":    speciality.UserId,
+				"hero_id":    speciality.HeroId,
+				"level":      speciality.Level,
+				"take_along": true,
+			}).MustCols("take_along").
+			Update(&model.UserSpeciality{
+				TakeAlong: false,
+			})
 		if err != nil {
 			return err
 		}
-	} else {
-		_, err := session.Insert(speciality)
-		if err != nil {
-			return err
-		}
+
+	}
+	_, err = session.
+		Where(builder.Eq{
+			"user_id":       speciality.UserId,
+			"hero_id":       speciality.HeroId,
+			"level":         speciality.Level,
+			"speciality_id": speciality.SpecialityId,
+		}).MustCols("take_along").
+		Update(&model.UserSpeciality{
+			TakeAlong: true,
+		})
+	if err != nil {
+		return err
 	}
 	return session.Commit()
 }
 
-// FindUserSpecialityByUserAndHero 根据用户和英雄获取专长
-func FindUserSpecialityByUserAndHero(userId int64, heroId int64) ([]model.UserSpeciality, error) {
+// FindTakeAlongUserSpecialityByUser 获取玩家所有以佩戴的专长
+func FindTakeAlongUserSpecialityByUser(userId int64, heroId int64) ([]model.UserSpeciality, error) {
 	var result []model.UserSpeciality
-	err := base.Engine.Where(builder.Eq{"user_id": userId, "hero_id": heroId}).
-		Cols("level", "speciality_id").
+	err := base.Engine.Where(builder.Eq{
+		"user_id":    userId,
+		"hero_id":    heroId,
+		"take_along": true,
+	}).Cols("level", "speciality_id").
 		Find(&result)
-	return result, err
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
