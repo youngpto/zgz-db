@@ -36,6 +36,9 @@ func HeroGainExperience(userId int64, resourceHeroId int64, experience float64) 
 	for _, rank := range route {
 		upgradeRoute[rank.Rank] = rank
 	}
+	if rank, ok := upgradeRoute[currentLevel]; ok {
+		result.CurrentMaxExp = rank.Experience
+	}
 
 	// 计算经验值
 	residual := experience
@@ -86,6 +89,9 @@ func HeroGainExperience(userId int64, resourceHeroId int64, experience float64) 
 		}
 		result.CurrentLevel = currentLevel
 		result.CurrentExp = currentExp
+		if rank, ok := upgradeRoute[currentLevel]; ok {
+			result.CurrentMaxExp = rank.Experience
+		}
 		// 后台自动领取升级奖励
 		go func() {
 			unclaimedRankReward, err := service.FindUnclaimedRankReward(userHeroRankInfo.UserId, int(userHeroRankInfo.HeroId), currentLevel)
