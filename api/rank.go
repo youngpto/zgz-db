@@ -24,7 +24,9 @@ func HeroGainExperience(userId int64, resourceHeroId int64, experience float64) 
 	var addLevel int   // 增长的等级
 	var addExp float64 // 增长的经验
 	result := new(dto.GainExperienceRes)
+	result.OriginLevel = currentLevel
 	result.CurrentLevel = currentLevel
+	result.OriginExp = currentExp
 	result.CurrentExp = currentExp
 
 	// 获取升级路线
@@ -37,6 +39,7 @@ func HeroGainExperience(userId int64, resourceHeroId int64, experience float64) 
 		upgradeRoute[rank.Rank] = rank
 	}
 	if rank, ok := upgradeRoute[currentLevel]; ok {
+		result.OriginMaxExp = rank.Experience
 		result.CurrentMaxExp = rank.Experience
 	}
 
