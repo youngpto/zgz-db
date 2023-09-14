@@ -103,6 +103,7 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 	}
 
 	result := &dto.HeroInfo{
+		HeroId: heroProperty.ResourceId,
 		GainExperienceRes: dto.GainExperienceRes{
 			CurrentLevel:  userHeroRankAndPropertyOffset.Rank,
 			CurrentExp:    userHeroRankAndPropertyOffset.ExperiencePool,
