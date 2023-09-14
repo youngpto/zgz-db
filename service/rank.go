@@ -20,7 +20,7 @@ func FindRankGTELevel(currentLevel int) ([]model.Rank, error) {
 	var result []model.Rank
 	err := base.Engine.Where(builder.Gte{"rank": currentLevel}).
 		Cols("rank", "experience").
-		Find(result)
+		Find(&result)
 	if err != nil {
 		return nil, err
 	}
