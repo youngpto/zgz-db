@@ -45,7 +45,7 @@ func SetUserPassive(userId int64, resourceHeroId int64, level int, resourcePassi
 		} else {
 			newDto := dto.UserHeroPassive{
 				Level:                      int32(datum.Level),
-				TakeAlongPassiveResourceId: 0,
+				TakeAlongPassiveResourceId: -1,
 				ChoosePool:                 make([]enum.HeroPassive, 0),
 			}
 			if datum.TakeAlong {

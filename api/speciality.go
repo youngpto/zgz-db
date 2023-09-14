@@ -45,7 +45,7 @@ func SetUserSpeciality(userId int64, resourceHeroId int64, level int, resourceSp
 		} else {
 			newDto := dto.UserHeroSpeciality{
 				Level:                         int32(datum.Level),
-				TakeAlongSpecialityResourceId: 0,
+				TakeAlongSpecialityResourceId: -1,
 				ChoosePool:                    make([]enum.HeroSpeciality, 0),
 			}
 			if datum.TakeAlong {

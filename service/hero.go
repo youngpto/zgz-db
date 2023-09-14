@@ -140,7 +140,7 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 		} else {
 			newDto := dto.UserHeroSpeciality{
 				Level:                         int32(userSpeciality.Level),
-				TakeAlongSpecialityResourceId: 0,
+				TakeAlongSpecialityResourceId: -1,
 				ChoosePool:                    make([]enum.HeroSpeciality, 0),
 			}
 			if userSpeciality.TakeAlong {
@@ -167,7 +167,7 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 		} else {
 			newDto := dto.UserHeroPassive{
 				Level:                      int32(userPassive.Level),
-				TakeAlongPassiveResourceId: 0,
+				TakeAlongPassiveResourceId: -1,
 				ChoosePool:                 make([]enum.HeroPassive, 0),
 			}
 			if userPassive.TakeAlong {
