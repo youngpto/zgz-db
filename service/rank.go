@@ -63,7 +63,6 @@ func FindUnclaimedRankReward(userId int64, webHeroId int, currentRank int) ([]mo
 	err = session.Where(builder.Eq{"hero_id": webHeroId}.
 		And(builder.Lte{"rank": currentRank}.
 			And(builder.NotIn("id", claimedIds)))).
-		Cols("id", "category", "type", "object_id", "object_value").
 		Find(&result)
 	if err != nil {
 		return nil, err
@@ -166,17 +165,18 @@ func InsertHeroUpgradeReward(heroUpgradeReward []*model.HeroUpgradeReward) {
 }
 
 func InsertUserHeroUpgradeRewardLog(session *xorm.Session, log *model.UserHeroUpgradeRewardLog) error {
-	_, err := session.Where(
-		builder.NotExists(builder.
-			Select("id").
-			From("user_hero_upgrade_reward_log").
-			Where(builder.Eq{
-				"user_id":                log.UserId,
-				"hero_upgrade_reward_id": log.HeroUpgradeRewardId},
-			)),
-	).Insert(log)
+	exist, err := session.Where(builder.Eq{
+		"user_id":                log.UserId,
+		"hero_upgrade_reward_id": log.HeroUpgradeRewardId},
+	).Exist(new(model.UserHeroUpgradeRewardLog))
 	if err != nil {
 		return err
+	}
+	if !exist {
+		_, err := session.Insert(log)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

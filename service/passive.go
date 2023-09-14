@@ -60,21 +60,23 @@ func InsertPassiveRule(batch []*model.PassiveRule) {
 
 // InsertNotExistUserPassive 不重复插入玩家被动
 func InsertNotExistUserPassive(session *xorm.Session, passive *model.UserPassive) (bool, error) {
-	insert, err := session.Where(
-		builder.NotExists(builder.
-			Select("id").
-			From("user_passive").
-			Where(builder.Eq{
-				"user_id":    passive.UserId,
-				"level":      passive.Level,
-				"hero_id":    passive.HeroId,
-				"passive_id": passive.PassiveId},
-			)),
-	).Insert(passive)
+	exist, err := session.Where(builder.Eq{
+		"user_id":    passive.UserId,
+		"level":      passive.Level,
+		"hero_id":    passive.HeroId,
+		"passive_id": passive.PassiveId},
+	).Exist(new(model.UserPassive))
 	if err != nil {
 		return false, err
 	}
-	return insert > 0, nil
+	if !exist {
+		insert, err := session.Insert(passive)
+		if err != nil {
+			return false, err
+		}
+		return insert > 0, nil
+	}
+	return false, nil
 }
 
 // UpdateTakeAlongFormUserPassiveByLevel 调整玩家在指定层级选中的被动

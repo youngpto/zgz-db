@@ -63,21 +63,23 @@ func InsertUserSpeciality(batch []*model.UserSpeciality) {
 
 // InsertNotExistUserSpeciality 不重复插入玩家专长
 func InsertNotExistUserSpeciality(session *xorm.Session, speciality *model.UserSpeciality) (bool, error) {
-	insert, err := session.Where(
-		builder.NotExists(builder.
-			Select("id").
-			From("user_speciality").
-			Where(builder.Eq{
-				"user_id":       speciality.UserId,
-				"level":         speciality.Level,
-				"hero_id":       speciality.HeroId,
-				"speciality_id": speciality.SpecialityId},
-			)),
-	).Insert(speciality)
+	exist, err := session.Where(builder.Eq{
+		"user_id":       speciality.UserId,
+		"level":         speciality.Level,
+		"hero_id":       speciality.HeroId,
+		"speciality_id": speciality.SpecialityId},
+	).Exist(new(model.UserSpeciality))
 	if err != nil {
 		return false, err
 	}
-	return insert > 0, nil
+	if !exist {
+		insert, err := session.Insert(speciality)
+		if err != nil {
+			return false, err
+		}
+		return insert > 0, nil
+	}
+	return false, nil
 }
 
 // UpdateTakeAlongFormUserSpecialityByLevel 调整玩家在指定层级选中的专长
