@@ -94,7 +94,7 @@ func receiveReward(userId int64, reward model.HeroUpgradeReward) error {
 		return err
 	}
 
-	switch reward.Type {
+	switch reward.Category {
 	case 1: // 专长
 		// 根据英雄Id和专长资源ID获取数据库中的专长
 		speciality := new(model.Speciality)
