@@ -63,7 +63,8 @@ func FindUnclaimedRankReward(userId int64, webHeroId int, currentRank int) ([]mo
 	err = session.Where(builder.Eq{"hero_id": webHeroId}.
 		And(builder.Lte{"rank": currentRank}.
 			And(builder.NotIn("id", claimedIds)))).
-		Cols("id", "category", "type", "object_id", "object_value").Find(result)
+		Cols("id", "category", "type", "object_id", "object_value").
+		Find(&result)
 	if err != nil {
 		return nil, err
 	}
