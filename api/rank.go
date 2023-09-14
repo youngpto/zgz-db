@@ -8,16 +8,16 @@ import (
 )
 
 // HeroGainExperience 英雄获得经验
-func HeroGainExperience(userId int64, resourceHeroId int64, experience float64) (*dto.GainExperienceRes, error) {
+func HeroGainExperience(userId int64, resourceHeroId int64, experience float64) (*dto.GainExperienceRes, chan int, error) {
 	// 解析英雄ID
 	heroId, err := service.GetHeroId(resourceHeroId)
 	if err != nil {
-		return nil, errors.New("未找到调查员类型")
+		return nil, nil, errors.New("未找到调查员类型")
 	}
 	// 获取玩家英雄等级和累计经验池
 	userHeroRankInfo, err := service.GetUserHeroRankInfo(userId, heroId)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	currentLevel := userHeroRankInfo.Rank
 	currentExp := userHeroRankInfo.ExperiencePool
@@ -30,7 +30,7 @@ func HeroGainExperience(userId int64, resourceHeroId int64, experience float64) 
 	// 获取升级路线
 	route, err := service.FindRankGTELevel(currentLevel)
 	if err != nil {
-		return result, nil
+		return result, nil, nil
 	}
 	var upgradeRoute = make(map[int]model.Rank)
 	for _, rank := range route {
@@ -86,24 +86,34 @@ func HeroGainExperience(userId int64, resourceHeroId int64, experience float64) 
 			ExperiencePool: currentExp,
 		})
 		if err != nil {
-			return result, nil
+			return result, nil, nil
 		}
 		result.CurrentLevel = currentLevel
 		result.CurrentExp = currentExp
 		if rank, ok := upgradeRoute[currentLevel]; ok {
 			result.CurrentMaxExp = rank.Experience
 		}
-		// 后台自动领取升级奖励
-		go func() {
-			unclaimedRankReward, err := service.FindUnclaimedRankReward(userHeroRankInfo.UserId, int(userHeroRankInfo.HeroId), currentLevel)
-			if err != nil {
-				return
-			}
-			_ = service.ReceiveReward(userId, unclaimedRankReward)
-		}()
 	}
 
-	return result, nil
+	ch := make(chan int, 10)
+	// 后台自动领取升级奖励
+	go func() {
+		defer close(ch)
+		unclaimedRankReward, err := service.FindUnclaimedRankReward(userHeroRankInfo.UserId, int(userHeroRankInfo.HeroId), currentLevel)
+		if err != nil {
+			return
+		}
+		rewardType := make(map[int]struct{})
+		for _, reward := range unclaimedRankReward {
+			rewardType[reward.Category] = struct{}{}
+		}
+		_ = service.ReceiveReward(userId, unclaimedRankReward)
+		for rt, _ := range rewardType {
+			ch <- rt
+		}
+	}()
+
+	return result, ch, nil
 }
 
 // GetUnclaimedRankReward 领取未领取的升级奖励
