@@ -64,12 +64,13 @@ func HeroGainExperience(userId int64, resourceHeroId int64, experience float64) 
 					// 没有配置下一个等级
 					break
 				}
+				addExp += differenceExp
 			} else {
 				// 不足够升级
+				addExp += residual
 				currentExp += residual
 				residual = 0
 			}
-			addExp += differenceExp
 		} else {
 			// 找不到当前等级的配置，直接退出
 			break

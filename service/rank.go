@@ -29,7 +29,10 @@ func FindRankGTELevel(currentLevel int) ([]model.Rank, error) {
 
 // UpdateUserRank 更新玩家英雄等级
 func UpdateUserRank(rank *model.UserHeroRank) error {
-	_, err := base.Engine.ID(rank.Id).Update(rank)
+	_, err := base.Engine.Table("user_hero").
+		Where(builder.Eq{"user_id": rank.UserId, "hero_id": rank.HeroId}).
+		MustCols("rank", "experience_pool").
+		Update(rank)
 	if err != nil {
 		return err
 	}
