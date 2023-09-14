@@ -33,6 +33,7 @@ func UpdatePropertyOffset(userId, resourceHeroId int64, property enum.HeroProper
 	result.BaseAgility += int32(offset.AgileOffset)
 	result.BaseKnowledge += int32(offset.KnowledgeOffset)
 	result.BaseWillPower += int32(offset.WillOffset)
+	result.AvailablePoints = int32(offset.TotalOffset - offset.LifeOffset - offset.ReasonOffset - offset.PowerOffset - offset.AgileOffset - offset.KnowledgeOffset - offset.WillOffset)
 
 	return result, nil
 }
@@ -53,9 +54,10 @@ func ResetPropertyOffset(userId, resourceHeroId int64) (*dto.UserHeroProperty, e
 	result.BaseWillPower += int32(heroInfo.Will)
 
 	//重置偏移量
-	err = service.ResetPropertyOffset(userId, heroInfo.Id)
+	offset, err := service.ResetPropertyOffset(userId, heroInfo.Id)
 	if err != nil {
 		return nil, err
 	}
+	result.AvailablePoints = int32(offset.TotalOffset)
 	return result, nil
 }

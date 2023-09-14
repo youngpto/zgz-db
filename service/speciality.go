@@ -144,14 +144,13 @@ func UpdateTakeAlongFormUserSpecialityByLevel(speciality *model.UserSpeciality) 
 	return session.Commit()
 }
 
-// FindTakeAlongUserSpecialityByUser 获取玩家所有以佩戴的专长
-func FindTakeAlongUserSpecialityByUser(userId int64, heroId int64) ([]model.UserSpeciality, error) {
+// FindAllUserSpecialityByUserAndHero 获取玩家所有专长
+func FindAllUserSpecialityByUserAndHero(userId int64, heroId int64) ([]model.UserSpeciality, error) {
 	var result []model.UserSpeciality
 	err := base.Engine.Where(builder.Eq{
-		"user_id":    userId,
-		"hero_id":    heroId,
-		"take_along": true,
-	}).Cols("level", "speciality_id").
+		"user_id": userId,
+		"hero_id": heroId,
+	}).Cols("level", "speciality_id", "take_along").
 		Find(&result)
 	if err != nil {
 		return nil, err

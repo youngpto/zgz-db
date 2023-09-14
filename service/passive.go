@@ -141,14 +141,13 @@ func UpdateTakeAlongFormUserPassiveByLevel(passive *model.UserPassive) error {
 	return session.Commit()
 }
 
-// FindTakeAlongUserPassiveByUser 获取玩家所有以佩戴的被动
-func FindTakeAlongUserPassiveByUser(userId int64, heroId int64) ([]model.UserPassive, error) {
+// FindAllUserPassiveByUser 获取玩家所有被动
+func FindAllUserPassiveByUser(userId int64, heroId int64) ([]model.UserPassive, error) {
 	var result []model.UserPassive
 	err := base.Engine.Where(builder.Eq{
-		"user_id":    userId,
-		"hero_id":    heroId,
-		"take_along": true,
-	}).Cols("level", "passive_id").
+		"user_id": userId,
+		"hero_id": heroId,
+	}).Cols("level", "passive_id", "take_along").
 		Find(&result)
 	if err != nil {
 		return nil, err

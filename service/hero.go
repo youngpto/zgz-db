@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/youngpto/zgz-db/base"
 	"github.com/youngpto/zgz-db/dto"
+	"github.com/youngpto/zgz-db/enum"
 	"github.com/youngpto/zgz-db/model"
 	"xorm.io/builder"
 )
@@ -70,10 +71,9 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 	// 获取专长
 	var speciality []model.UserSpeciality
 	err = base.Engine.Where(builder.Eq{
-		"user_id":    userId,
-		"hero_id":    heroId,
-		"take_along": true,
-	}).Cols("level", "speciality_id").
+		"user_id": userId,
+		"hero_id": heroId,
+	}).Cols("level", "speciality_id", "take_along").
 		Find(&speciality)
 	if err != nil {
 		return nil, err
@@ -81,10 +81,9 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 	// 获取被动
 	var passive []model.UserPassive
 	err = base.Engine.Where(builder.Eq{
-		"user_id":    userId,
-		"hero_id":    heroId,
-		"take_along": true,
-	}).Cols("level", "passive_id").
+		"user_id": userId,
+		"hero_id": heroId,
+	}).Cols("level", "passive_id", "take_along").
 		Find(&passive)
 	if err != nil {
 		return nil, err
@@ -103,24 +102,72 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 			BaseAgility:   int32(heroProperty.Agile + userHeroRankAndPropertyOffset.AgileOffset),
 			BaseKnowledge: int32(heroProperty.Knowledge + userHeroRankAndPropertyOffset.KnowledgeOffset),
 			BaseWillPower: int32(heroProperty.Will + userHeroRankAndPropertyOffset.WillOffset),
+			AvailablePoints: int32(userHeroRankAndPropertyOffset.TotalOffset -
+				userHeroRankAndPropertyOffset.LifeOffset -
+				userHeroRankAndPropertyOffset.ReasonOffset -
+				userHeroRankAndPropertyOffset.PowerOffset -
+				userHeroRankAndPropertyOffset.AgileOffset -
+				userHeroRankAndPropertyOffset.KnowledgeOffset -
+				userHeroRankAndPropertyOffset.WillOffset),
 		},
 		Speciality: make([]dto.UserHeroSpeciality, 0),
 		Passive:    make([]dto.UserHeroPassive, 0),
 	}
+
+	var sMap = make(map[int]dto.UserHeroSpeciality)
 	for _, userSpeciality := range speciality {
 		resourceID, _ := GetHeroSpecialityResourceId(userSpeciality.SpecialityId)
-		result.Speciality = append(result.Speciality, dto.UserHeroSpeciality{
-			Level:                int32(userSpeciality.Level),
-			SpecialityResourceId: resourceID,
-		})
+		if old, ok := sMap[userSpeciality.Level]; ok {
+			if userSpeciality.TakeAlong {
+				old.TakeAlongSpecialityResourceId = resourceID
+			} else {
+				old.ChoosePool = append(old.ChoosePool, resourceID)
+			}
+		} else {
+			newDto := dto.UserHeroSpeciality{
+				Level:                         int32(userSpeciality.Level),
+				TakeAlongSpecialityResourceId: 0,
+				ChoosePool:                    make([]enum.HeroSpeciality, 0),
+			}
+			if userSpeciality.TakeAlong {
+				newDto.TakeAlongSpecialityResourceId = resourceID
+			} else {
+				newDto.ChoosePool = append(newDto.ChoosePool, resourceID)
+			}
+			sMap[userSpeciality.Level] = newDto
+		}
 	}
+	for _, heroSpeciality := range sMap {
+		result.Speciality = append(result.Speciality, heroSpeciality)
+	}
+
+	var pMap = make(map[int]dto.UserHeroPassive)
 	for _, userPassive := range passive {
 		resourceID, _ := GetHeroPassiveResourceId(userPassive.PassiveId)
-		result.Passive = append(result.Passive, dto.UserHeroPassive{
-			Level:             int32(userPassive.Level),
-			PassiveResourceId: resourceID,
-		})
+		if old, ok := pMap[userPassive.Level]; ok {
+			if userPassive.TakeAlong {
+				old.TakeAlongPassiveResourceId = resourceID
+			} else {
+				old.ChoosePool = append(old.ChoosePool, resourceID)
+			}
+		} else {
+			newDto := dto.UserHeroPassive{
+				Level:                      int32(userPassive.Level),
+				TakeAlongPassiveResourceId: 0,
+				ChoosePool:                 make([]enum.HeroPassive, 0),
+			}
+			if userPassive.TakeAlong {
+				newDto.TakeAlongPassiveResourceId = resourceID
+			} else {
+				newDto.ChoosePool = append(newDto.ChoosePool, resourceID)
+			}
+			pMap[userPassive.Level] = newDto
+		}
 	}
+	for _, heroPassive := range pMap {
+		result.Passive = append(result.Passive, heroPassive)
+	}
+
 	err = session.Commit()
 	if err != nil {
 		return nil, err

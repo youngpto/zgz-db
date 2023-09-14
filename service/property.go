@@ -90,16 +90,38 @@ func UpdatePropertyOffsetByType(userId, heroId int64, property enum.HeroProperty
 }
 
 // ResetPropertyOffset 重置玩家属性加点
-func ResetPropertyOffset(userId, heroId int64) error {
-	_, err := base.Engine.Table("user_hero").
+func ResetPropertyOffset(userId, heroId int64) (*model.PropertyOffset, error) {
+	session := base.Engine.NewSession()
+	defer session.Close()
+
+	if err := session.Begin(); err != nil {
+		return nil, err
+	}
+
+	_, err := session.Table("user_hero").
 		Where(builder.Eq{"user_id": userId, "hero_id": heroId}).
 		MustCols("life_offset", "reason_offset", "power_offset",
 			"agile_offset", "knowledge_offset", "will_offset").
 		Update(new(model.PropertyOffset))
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	userHeroPropertyOffset := new(model.PropertyOffset)
+	_, err = session.Table("user_hero").
+		Where(builder.Eq{"user_id": userId, "hero_id": heroId}).
+		Cols("total_offset").
+		Get(userHeroPropertyOffset)
+	if err != nil {
+		return nil, err
+	}
+
+	err = session.Commit()
+	if err != nil {
+		return nil, err
+	}
+
+	return userHeroPropertyOffset, nil
 }
 
 // FindHeroBaseProperty 查询英雄的基础六维属性

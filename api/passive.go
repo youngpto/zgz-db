@@ -26,20 +26,39 @@ func SetUserPassive(userId int64, resourceHeroId int64, level int, resourcePassi
 	if err != nil {
 		return nil, err
 	}
-	data, err := service.FindTakeAlongUserPassiveByUser(userId, heroId)
+	data, err := service.FindAllUserPassiveByUser(userId, heroId)
 	if err != nil {
 		return nil, err
 	}
-	var result []dto.UserHeroPassive
+	var tmap = make(map[int]dto.UserHeroPassive)
 	for _, datum := range data {
 		resourceId, err := service.GetHeroPassiveResourceId(datum.PassiveId)
 		if err != nil {
 			continue
 		}
-		result = append(result, dto.UserHeroPassive{
-			Level:             int32(datum.Level),
-			PassiveResourceId: resourceId,
-		})
+		if old, ok := tmap[datum.Level]; ok {
+			if datum.TakeAlong {
+				old.TakeAlongPassiveResourceId = resourceId
+			} else {
+				old.ChoosePool = append(old.ChoosePool, resourceId)
+			}
+		} else {
+			newDto := dto.UserHeroPassive{
+				Level:                      int32(datum.Level),
+				TakeAlongPassiveResourceId: 0,
+				ChoosePool:                 make([]enum.HeroPassive, 0),
+			}
+			if datum.TakeAlong {
+				newDto.TakeAlongPassiveResourceId = resourceId
+			} else {
+				newDto.ChoosePool = append(newDto.ChoosePool, resourceId)
+			}
+			tmap[datum.Level] = newDto
+		}
+	}
+	var result []dto.UserHeroPassive
+	for _, passive := range tmap {
+		result = append(result, passive)
 	}
 	return result, nil
 }
