@@ -34,8 +34,10 @@ func ConvEnum2Str(property enum.HeroProperty) string {
 
 // IncrOrDecrByType 计算某项属性自增或自减后的值
 func (p *PropertyOffset) IncrOrDecrByType(property enum.HeroProperty, isIncr bool) (int, bool) {
-	if p.LifeOffset+p.ReasonOffset+p.PowerOffset+p.AgileOffset+p.KnowledgeOffset+p.WillOffset >= p.TotalOffset {
-		return 0, false
+	if isIncr {
+		if p.LifeOffset+p.ReasonOffset+p.PowerOffset+p.AgileOffset+p.KnowledgeOffset+p.WillOffset >= p.TotalOffset {
+			return 0, false
+		}
 	}
 
 	changeLayer := 0
