@@ -76,7 +76,8 @@ func UpdatePropertyOffsetByType(userId, heroId int64, property enum.HeroProperty
 		return nil, errors.New("不合法的参数项")
 	}
 	_, err = session.Table("user_hero").
-		ID(userHeroPropertyOffset.Id).
+		Where(builder.Eq{"user_id": userId, "hero_id": heroId}).
+		MustCols(str).
 		Update(map[string]interface{}{str: number})
 	if err != nil {
 		return nil, err
