@@ -97,6 +97,7 @@ func HeroGainExperience(userId int64, resourceHeroId int64, experience float64) 
 			result.CurrentMaxExp = rank.Experience
 		}
 	}
+	result.AddExpNumber = addExp
 
 	ch := make(chan int, 10)
 	// 后台自动领取升级奖励
