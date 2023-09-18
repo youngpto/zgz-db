@@ -136,3 +136,37 @@ func GetUnclaimedRankReward(userId int64, resourceHeroId int64, currenRank int) 
 	}()
 	return nil
 }
+
+// GetUserHeroRankInfo 获取玩家英雄等级
+func GetUserHeroRankInfo(userId int64, resourceHeroId int64) (*dto.GainExperienceRes, error) {
+	// 解析英雄ID
+	heroId, err := service.GetHeroId(resourceHeroId)
+	if err != nil {
+		return nil, errors.New("未找到调查员类型")
+	}
+	// 获取玩家英雄等级和累计经验池
+	userHeroRankInfo, err := service.GetUserHeroRankInfo(userId, heroId)
+	if err != nil {
+		return nil, err
+	}
+	result := new(dto.GainExperienceRes)
+	result.OriginLevel = userHeroRankInfo.Rank
+	result.CurrentLevel = userHeroRankInfo.Rank
+	result.OriginExp = userHeroRankInfo.ExperiencePool
+	result.CurrentExp = userHeroRankInfo.ExperiencePool
+
+	// 获取升级路线
+	route, err := service.FindRankGTELevel(userHeroRankInfo.Rank)
+	if err != nil {
+		return result, nil
+	}
+	var upgradeRoute = make(map[int]model.Rank)
+	for _, rank := range route {
+		upgradeRoute[rank.Rank] = rank
+	}
+	if rank, ok := upgradeRoute[userHeroRankInfo.Rank]; ok {
+		result.OriginMaxExp = rank.Experience
+		result.CurrentMaxExp = rank.Experience
+	}
+	return result, nil
+}
