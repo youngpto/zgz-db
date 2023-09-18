@@ -124,27 +124,29 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 				userHeroRankAndPropertyOffset.KnowledgeOffset -
 				userHeroRankAndPropertyOffset.WillOffset),
 		},
-		Speciality: make([]dto.UserHeroSpeciality, 0),
-		Passive:    make([]dto.UserHeroPassive, 0),
+		Speciality: make([]*dto.UserHeroSpeciality, 0),
+		Passive:    make([]*dto.UserHeroPassive, 0),
 	}
 
-	var sMap = make(map[int]dto.UserHeroSpeciality)
+	var sMap = make(map[int]*dto.UserHeroSpeciality)
 	for _, userSpeciality := range speciality {
 		resourceID, _ := GetHeroSpecialityResourceId(userSpeciality.SpecialityId)
 		if old, ok := sMap[userSpeciality.Level]; ok {
 			if userSpeciality.TakeAlong {
 				old.TakeAlongSpecialityResourceId = resourceID
+				old.ChoosePool = append(old.ChoosePool, resourceID)
 			} else {
 				old.ChoosePool = append(old.ChoosePool, resourceID)
 			}
 		} else {
-			newDto := dto.UserHeroSpeciality{
+			newDto := &dto.UserHeroSpeciality{
 				Level:                         int32(userSpeciality.Level),
 				TakeAlongSpecialityResourceId: -1,
 				ChoosePool:                    make([]enum.HeroSpeciality, 0),
 			}
 			if userSpeciality.TakeAlong {
 				newDto.TakeAlongSpecialityResourceId = resourceID
+				newDto.ChoosePool = append(newDto.ChoosePool, resourceID)
 			} else {
 				newDto.ChoosePool = append(newDto.ChoosePool, resourceID)
 			}
@@ -155,7 +157,7 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 		result.Speciality = append(result.Speciality, heroSpeciality)
 	}
 
-	var pMap = make(map[int]dto.UserHeroPassive)
+	var pMap = make(map[int]*dto.UserHeroPassive)
 	for _, userPassive := range passive {
 		resourceID, _ := GetHeroPassiveResourceId(userPassive.PassiveId)
 		if old, ok := pMap[userPassive.Level]; ok {
@@ -165,7 +167,7 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 				old.ChoosePool = append(old.ChoosePool, resourceID)
 			}
 		} else {
-			newDto := dto.UserHeroPassive{
+			newDto := &dto.UserHeroPassive{
 				Level:                      int32(userPassive.Level),
 				TakeAlongPassiveResourceId: -1,
 				ChoosePool:                 make([]enum.HeroPassive, 0),

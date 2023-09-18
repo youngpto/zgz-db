@@ -5,6 +5,6 @@ type HeroInfo struct {
 	HeroId int
 	GainExperienceRes
 	UserHeroProperty
-	Speciality []UserHeroSpeciality
-	Passive    []UserHeroPassive
+	Speciality []*UserHeroSpeciality
+	Passive    []*UserHeroPassive
 }
