@@ -13,18 +13,29 @@ func SetUserPassive(userId int64, resourceHeroId int64, level int, resourcePassi
 	if err != nil {
 		return nil, err
 	}
-	passiveId, err := service.GetHeroPassiveId(int(heroId), int(resourcePassiveId))
-	if err != nil {
-		return nil, err
-	}
-	err = service.UpdateTakeAlongFormUserPassiveByLevel(&model.UserPassive{
-		UserId:    userId,
-		HeroId:    heroId,
-		Level:     level,
-		PassiveId: passiveId,
-	})
-	if err != nil {
-		return nil, err
+	if resourcePassiveId == -1 {
+		err := service.CancelTakeAlongUserPassiveByLevel(&model.UserPassive{
+			UserId: userId,
+			HeroId: heroId,
+			Level:  level,
+		})
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		passiveId, err := service.GetHeroPassiveId(int(heroId), int(resourcePassiveId))
+		if err != nil {
+			return nil, err
+		}
+		err = service.UpdateTakeAlongFormUserPassiveByLevel(&model.UserPassive{
+			UserId:    userId,
+			HeroId:    heroId,
+			Level:     level,
+			PassiveId: passiveId,
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
 	data, err := service.FindAllUserPassiveByUser(userId, heroId)
 	if err != nil {
@@ -65,6 +76,7 @@ func SetUserPassive(userId int64, resourceHeroId int64, level int, resourcePassi
 	return result, nil
 }
 
+// GetUserHeroPassive 获取玩家英雄被动
 func GetUserHeroPassive(userId int64, resourceHeroId int64) ([]*dto.UserHeroPassive, error) {
 	heroId, err := service.GetHeroId(resourceHeroId)
 	if err != nil {

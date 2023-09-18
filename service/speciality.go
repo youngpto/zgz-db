@@ -82,6 +82,24 @@ func InsertNotExistUserSpeciality(session *xorm.Session, speciality *model.UserS
 	return false, nil
 }
 
+// CancelTakeAlongUserSpecialityByLevel 取消玩家在对应层级设置的专长
+func CancelTakeAlongUserSpecialityByLevel(speciality *model.UserSpeciality) error {
+	_, err := base.Engine.
+		Where(builder.Eq{
+			"user_id":    speciality.UserId,
+			"hero_id":    speciality.HeroId,
+			"level":      speciality.Level,
+			"take_along": true,
+		}).MustCols("take_along").
+		Update(&model.UserSpeciality{
+			TakeAlong: false,
+		})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // UpdateTakeAlongFormUserSpecialityByLevel 调整玩家在指定层级选中的专长
 func UpdateTakeAlongFormUserSpecialityByLevel(speciality *model.UserSpeciality) error {
 	session := base.Engine.NewSession()

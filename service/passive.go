@@ -79,6 +79,24 @@ func InsertNotExistUserPassive(session *xorm.Session, passive *model.UserPassive
 	return false, nil
 }
 
+// CancelTakeAlongUserPassiveByLevel 取消玩家在对应层级设置的被动
+func CancelTakeAlongUserPassiveByLevel(passive *model.UserPassive) error {
+	_, err := base.Engine.
+		Where(builder.Eq{
+			"user_id":    passive.UserId,
+			"hero_id":    passive.HeroId,
+			"level":      passive.Level,
+			"take_along": true,
+		}).MustCols("take_along").
+		Update(&model.UserPassive{
+			TakeAlong: false,
+		})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // UpdateTakeAlongFormUserPassiveByLevel 调整玩家在指定层级选中的被动
 func UpdateTakeAlongFormUserPassiveByLevel(passive *model.UserPassive) error {
 	session := base.Engine.NewSession()
@@ -125,7 +143,6 @@ func UpdateTakeAlongFormUserPassiveByLevel(passive *model.UserPassive) error {
 		if err != nil {
 			return err
 		}
-
 	}
 	_, err = session.
 		Where(builder.Eq{
