@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/go-xorm/xorm"
 	"github.com/youngpto/zgz-db/base"
+	"github.com/youngpto/zgz-db/dto"
 	"github.com/youngpto/zgz-db/enum"
 	"github.com/youngpto/zgz-db/model"
 	"xorm.io/builder"
@@ -165,15 +166,50 @@ func UpdateTakeAlongFormUserSpecialityByLevel(speciality *model.UserSpeciality) 
 }
 
 // FindAllUserSpecialityByUserAndHero 获取玩家所有专长
-func FindAllUserSpecialityByUserAndHero(userId int64, heroId int64) ([]model.UserSpeciality, error) {
-	var result []model.UserSpeciality
-	err := base.Engine.Where(builder.Eq{
-		"user_id": userId,
-		"hero_id": heroId,
-	}).Cols("level", "speciality_id", "take_along").
-		Find(&result)
+func FindAllUserSpecialityByUserAndHero(userId int64, heroId int64) ([]*dto.UserHeroSpeciality, error) {
+	tempMap := make(map[int]*dto.UserHeroSpeciality)
+
+	var userHeroSpecialityInfoList []model.UserHeroSpecialityInfo
+	err := base.Engine.Table("user_speciality").Alias("us").
+		Join("LEFT", []string{"speciality", "s"}, "us.speciality_id = s.id").
+		Where("us.user_id = ? AND us.hero_id = ? AND us.take_along = 1", userId, heroId).
+		Find(&userHeroSpecialityInfoList)
 	if err != nil {
 		return nil, err
+	}
+	for _, speciality := range userHeroSpecialityInfoList {
+		tempMap[speciality.Level] = &dto.UserHeroSpeciality{
+			Level:                         int32(speciality.Level),
+			TakeAlongSpecialityResourceId: enum.HeroSpeciality(speciality.ResourceId),
+			ChoosePool:                    make([]enum.HeroSpeciality, 0),
+		}
+	}
+
+	var userHeroSpecialityRuleInfoList []model.SpecialityRuleInfo
+	err = base.Engine.Table("speciality_rule").Alias("sr").
+		Join("LEFT", []string{"speciality", "s"}, "sr.speciality_id = s.id").
+		Where("sr.hero_id = ?", heroId).
+		Find(&userHeroSpecialityRuleInfoList)
+	if err != nil {
+		return nil, err
+	}
+	for _, specialityRuleInfo := range userHeroSpecialityRuleInfoList {
+		if old, ok := tempMap[specialityRuleInfo.Level]; ok {
+			old.ChoosePool = append(old.ChoosePool, enum.HeroSpeciality(specialityRuleInfo.ResourceId))
+		} else {
+			newDto := &dto.UserHeroSpeciality{
+				Level:                         int32(specialityRuleInfo.Level),
+				TakeAlongSpecialityResourceId: -1,
+				ChoosePool:                    make([]enum.HeroSpeciality, 0),
+			}
+			newDto.ChoosePool = append(newDto.ChoosePool, enum.HeroSpeciality(specialityRuleInfo.ResourceId))
+			tempMap[specialityRuleInfo.Level] = newDto
+		}
+	}
+
+	var result []*dto.UserHeroSpeciality
+	for _, speciality := range tempMap {
+		result = append(result, speciality)
 	}
 	return result, nil
 }

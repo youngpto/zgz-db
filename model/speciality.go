@@ -48,3 +48,13 @@ type UserSpeciality struct {
 func (u *UserSpeciality) TableName() string {
 	return "user_speciality"
 }
+
+type SpecialityRuleInfo struct {
+	SpecialityRule `xorm:"extends"` // 专长规则配置
+	Speciality     `xorm:"extends"` // 专长基础配置
+}
+
+type UserHeroSpecialityInfo struct {
+	UserSpeciality `xorm:"extends"` // 玩家英雄配置
+	Speciality     `xorm:"extends"` // 专长基础配置
+}

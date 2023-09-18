@@ -47,3 +47,13 @@ type UserPassive struct {
 func (u *UserPassive) TableName() string {
 	return "user_passive"
 }
+
+type PassiveRuleInfo struct {
+	PassiveRule `xorm:"extends"` // 被动规则配置
+	Passive     `xorm:"extends"` // 被动基本信息
+}
+
+type UserHeroPassiveInfo struct {
+	UserPassive `xorm:"extends"` // 用户被动配置
+	Passive     `xorm:"extends"` // 被动基本信息
+}

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/go-xorm/xorm"
 	"github.com/youngpto/zgz-db/base"
+	"github.com/youngpto/zgz-db/dto"
 	"github.com/youngpto/zgz-db/enum"
 	"github.com/youngpto/zgz-db/model"
 	"xorm.io/builder"
@@ -151,7 +152,7 @@ func UpdateTakeAlongFormUserPassiveByLevel(passive *model.UserPassive) error {
 			"level":      passive.Level,
 			"passive_id": passive.PassiveId,
 		}).MustCols("take_along").
-		Update(&model.UserSpeciality{
+		Update(&model.UserPassive{
 			TakeAlong: true,
 		})
 	if err != nil {
@@ -161,15 +162,50 @@ func UpdateTakeAlongFormUserPassiveByLevel(passive *model.UserPassive) error {
 }
 
 // FindAllUserPassiveByUser 获取玩家所有被动
-func FindAllUserPassiveByUser(userId int64, heroId int64) ([]model.UserPassive, error) {
-	var result []model.UserPassive
-	err := base.Engine.Where(builder.Eq{
-		"user_id": userId,
-		"hero_id": heroId,
-	}).Cols("level", "passive_id", "take_along").
-		Find(&result)
+func FindAllUserPassiveByUser(userId int64, heroId int64) ([]*dto.UserHeroPassive, error) {
+	tempMap := make(map[int]*dto.UserHeroPassive)
+
+	var userHeroPassiveInfoList []model.UserHeroPassiveInfo
+	err := base.Engine.Table("user_passive").Alias("up").
+		Join("LEFT", []string{"passive", "p"}, "up.passive_id = p.id").
+		Where("up.user_id = ? AND up.hero_id = ? AND up.take_along = 1", userId, heroId).
+		Find(&userHeroPassiveInfoList)
 	if err != nil {
 		return nil, err
+	}
+	for _, passive := range userHeroPassiveInfoList {
+		tempMap[passive.Level] = &dto.UserHeroPassive{
+			Level:                      int32(passive.Level),
+			TakeAlongPassiveResourceId: enum.HeroPassive(passive.ResourceId),
+			ChoosePool:                 make([]enum.HeroPassive, 0),
+		}
+	}
+
+	var userHeroPassiveRuleInfoList []model.PassiveRuleInfo
+	err = base.Engine.Table("passive_rule").Alias("pr").
+		Join("LEFT", []string{"passive", "p"}, "pr.passive_id = p.id").
+		Where("pr.hero_id = ?", heroId).
+		Find(&userHeroPassiveRuleInfoList)
+	if err != nil {
+		return nil, err
+	}
+	for _, passiveRuleInfo := range userHeroPassiveRuleInfoList {
+		if old, ok := tempMap[passiveRuleInfo.Level]; ok {
+			old.ChoosePool = append(old.ChoosePool, enum.HeroPassive(passiveRuleInfo.ResourceId))
+		} else {
+			newDto := &dto.UserHeroPassive{
+				Level:                      int32(passiveRuleInfo.Level),
+				TakeAlongPassiveResourceId: -1,
+				ChoosePool:                 make([]enum.HeroPassive, 0),
+			}
+			newDto.ChoosePool = append(newDto.ChoosePool, enum.HeroPassive(passiveRuleInfo.ResourceId))
+			tempMap[passiveRuleInfo.Level] = newDto
+		}
+	}
+
+	var result []*dto.UserHeroPassive
+	for _, passiveInfo := range tempMap {
+		result = append(result, passiveInfo)
 	}
 	return result, nil
 }

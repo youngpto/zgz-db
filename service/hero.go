@@ -3,7 +3,6 @@ package service
 import (
 	"github.com/youngpto/zgz-db/base"
 	"github.com/youngpto/zgz-db/dto"
-	"github.com/youngpto/zgz-db/enum"
 	"github.com/youngpto/zgz-db/model"
 	"xorm.io/builder"
 )
@@ -82,22 +81,12 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 		return nil, err
 	}
 	// 获取专长
-	var speciality []model.UserSpeciality
-	err = base.Engine.Where(builder.Eq{
-		"user_id": userId,
-		"hero_id": heroId,
-	}).Cols("level", "speciality_id", "take_along").
-		Find(&speciality)
+	specialities, err := FindAllUserSpecialityByUserAndHero(userId, heroId)
 	if err != nil {
 		return nil, err
 	}
 	// 获取被动
-	var passive []model.UserPassive
-	err = base.Engine.Where(builder.Eq{
-		"user_id": userId,
-		"hero_id": heroId,
-	}).Cols("level", "passive_id", "take_along").
-		Find(&passive)
+	passives, err := FindAllUserPassiveByUser(userId, heroId)
 	if err != nil {
 		return nil, err
 	}
@@ -128,61 +117,8 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 		Passive:    make([]*dto.UserHeroPassive, 0),
 	}
 
-	var sMap = make(map[int]*dto.UserHeroSpeciality)
-	for _, userSpeciality := range speciality {
-		resourceID, _ := GetHeroSpecialityResourceId(userSpeciality.SpecialityId)
-		if old, ok := sMap[userSpeciality.Level]; ok {
-			if userSpeciality.TakeAlong {
-				old.TakeAlongSpecialityResourceId = resourceID
-				old.ChoosePool = append(old.ChoosePool, resourceID)
-			} else {
-				old.ChoosePool = append(old.ChoosePool, resourceID)
-			}
-		} else {
-			newDto := &dto.UserHeroSpeciality{
-				Level:                         int32(userSpeciality.Level),
-				TakeAlongSpecialityResourceId: -1,
-				ChoosePool:                    make([]enum.HeroSpeciality, 0),
-			}
-			if userSpeciality.TakeAlong {
-				newDto.TakeAlongSpecialityResourceId = resourceID
-				newDto.ChoosePool = append(newDto.ChoosePool, resourceID)
-			} else {
-				newDto.ChoosePool = append(newDto.ChoosePool, resourceID)
-			}
-			sMap[userSpeciality.Level] = newDto
-		}
-	}
-	for _, heroSpeciality := range sMap {
-		result.Speciality = append(result.Speciality, heroSpeciality)
-	}
-
-	var pMap = make(map[int]*dto.UserHeroPassive)
-	for _, userPassive := range passive {
-		resourceID, _ := GetHeroPassiveResourceId(userPassive.PassiveId)
-		if old, ok := pMap[userPassive.Level]; ok {
-			if userPassive.TakeAlong {
-				old.TakeAlongPassiveResourceId = resourceID
-			} else {
-				old.ChoosePool = append(old.ChoosePool, resourceID)
-			}
-		} else {
-			newDto := &dto.UserHeroPassive{
-				Level:                      int32(userPassive.Level),
-				TakeAlongPassiveResourceId: -1,
-				ChoosePool:                 make([]enum.HeroPassive, 0),
-			}
-			if userPassive.TakeAlong {
-				newDto.TakeAlongPassiveResourceId = resourceID
-			} else {
-				newDto.ChoosePool = append(newDto.ChoosePool, resourceID)
-			}
-			pMap[userPassive.Level] = newDto
-		}
-	}
-	for _, heroPassive := range pMap {
-		result.Passive = append(result.Passive, heroPassive)
-	}
+	result.Speciality = specialities
+	result.Passive = passives
 
 	err = session.Commit()
 	if err != nil {
