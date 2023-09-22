@@ -92,6 +92,13 @@ func RebuildHeroUpgradeRewardTable() {
 	})
 	batch = append(batch, &model.HeroUpgradeReward{
 		HeroId:      int(heroId),
+		Rank:        3,
+		Category:    2,
+		ObjectId:    34,
+		ObjectValue: 1,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
 		Rank:        4,
 		Category:    3,
 		ObjectId:    int(enum.HeroPassive1),
@@ -116,6 +123,13 @@ func RebuildHeroUpgradeRewardTable() {
 		Rank:        5,
 		Category:    4,
 		ObjectValue: 1,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        6,
+		Category:    2,
+		ObjectId:    1039,
+		ObjectValue: 2,
 	})
 	batch = append(batch, &model.HeroUpgradeReward{
 		HeroId:      int(heroId),
@@ -152,6 +166,13 @@ func RebuildHeroUpgradeRewardTable() {
 		ObjectId:    int(enum.HeroPassive6),
 		ObjectValue: 2,
 	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        9,
+		Category:    2,
+		ObjectId:    1040,
+		ObjectValue: 2,
+	})
 
 	heroId, _ = service.GetHeroId(1)
 	batch = append(batch, &model.HeroUpgradeReward{
@@ -173,6 +194,13 @@ func RebuildHeroUpgradeRewardTable() {
 		Rank:        2,
 		Category:    4,
 		ObjectValue: 1,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        3,
+		Category:    2,
+		ObjectId:    1013,
+		ObjectValue: 2,
 	})
 	batch = append(batch, &model.HeroUpgradeReward{
 		HeroId:      int(heroId),
@@ -200,6 +228,13 @@ func RebuildHeroUpgradeRewardTable() {
 		Rank:        5,
 		Category:    4,
 		ObjectValue: 1,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        6,
+		Category:    2,
+		ObjectId:    1015,
+		ObjectValue: 2,
 	})
 	batch = append(batch, &model.HeroUpgradeReward{
 		HeroId:      int(heroId),
@@ -236,6 +271,13 @@ func RebuildHeroUpgradeRewardTable() {
 		ObjectId:    int(enum.HeroPassive6),
 		ObjectValue: 2,
 	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        9,
+		Category:    2,
+		ObjectId:    1014,
+		ObjectValue: 1,
+	})
 
 	heroId, _ = service.GetHeroId(2)
 	batch = append(batch, &model.HeroUpgradeReward{
@@ -257,6 +299,13 @@ func RebuildHeroUpgradeRewardTable() {
 		Rank:        2,
 		Category:    4,
 		ObjectValue: 1,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        3,
+		Category:    2,
+		ObjectId:    1046,
+		ObjectValue: 2,
 	})
 	batch = append(batch, &model.HeroUpgradeReward{
 		HeroId:      int(heroId),
@@ -284,6 +333,13 @@ func RebuildHeroUpgradeRewardTable() {
 		Rank:        5,
 		Category:    4,
 		ObjectValue: 1,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        6,
+		Category:    2,
+		ObjectId:    1047,
+		ObjectValue: 2,
 	})
 	batch = append(batch, &model.HeroUpgradeReward{
 		HeroId:      int(heroId),
@@ -320,6 +376,13 @@ func RebuildHeroUpgradeRewardTable() {
 		ObjectId:    int(enum.HeroPassive6),
 		ObjectValue: 2,
 	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        9,
+		Category:    2,
+		ObjectId:    1048,
+		ObjectValue: 1,
+	})
 
 	heroId, _ = service.GetHeroId(3)
 	batch = append(batch, &model.HeroUpgradeReward{
@@ -341,6 +404,13 @@ func RebuildHeroUpgradeRewardTable() {
 		Rank:        2,
 		Category:    4,
 		ObjectValue: 1,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        3,
+		Category:    2,
+		ObjectId:    1024,
+		ObjectValue: 2,
 	})
 	batch = append(batch, &model.HeroUpgradeReward{
 		HeroId:      int(heroId),
@@ -368,6 +438,13 @@ func RebuildHeroUpgradeRewardTable() {
 		Rank:        5,
 		Category:    4,
 		ObjectValue: 1,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        6,
+		Category:    2,
+		ObjectId:    2023,
+		ObjectValue: 2,
 	})
 	batch = append(batch, &model.HeroUpgradeReward{
 		HeroId:      int(heroId),
@@ -404,6 +481,13 @@ func RebuildHeroUpgradeRewardTable() {
 		ObjectId:    int(enum.HeroPassive6),
 		ObjectValue: 2,
 	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        9,
+		Category:    2,
+		ObjectId:    2024,
+		ObjectValue: 1,
+	})
 
 	heroId, _ = service.GetHeroId(4)
 	batch = append(batch, &model.HeroUpgradeReward{
@@ -425,6 +509,13 @@ func RebuildHeroUpgradeRewardTable() {
 		Rank:        2,
 		Category:    4,
 		ObjectValue: 1,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        3,
+		Category:    2,
+		ObjectId:    1004,
+		ObjectValue: 2,
 	})
 	batch = append(batch, &model.HeroUpgradeReward{
 		HeroId:      int(heroId),
@@ -451,6 +542,13 @@ func RebuildHeroUpgradeRewardTable() {
 		HeroId:      int(heroId),
 		Rank:        5,
 		Category:    4,
+		ObjectValue: 1,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        6,
+		Category:    2,
+		ObjectId:    2,
 		ObjectValue: 1,
 	})
 	batch = append(batch, &model.HeroUpgradeReward{
@@ -488,6 +586,13 @@ func RebuildHeroUpgradeRewardTable() {
 		ObjectId:    int(enum.HeroPassive6),
 		ObjectValue: 2,
 	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        9,
+		Category:    2,
+		ObjectId:    2003,
+		ObjectValue: 2,
+	})
 
 	heroId, _ = service.GetHeroId(5)
 	batch = append(batch, &model.HeroUpgradeReward{
@@ -509,6 +614,13 @@ func RebuildHeroUpgradeRewardTable() {
 		Rank:        2,
 		Category:    4,
 		ObjectValue: 1,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        3,
+		Category:    2,
+		ObjectId:    1053,
+		ObjectValue: 2,
 	})
 	batch = append(batch, &model.HeroUpgradeReward{
 		HeroId:      int(heroId),
@@ -536,6 +648,13 @@ func RebuildHeroUpgradeRewardTable() {
 		Rank:        5,
 		Category:    4,
 		ObjectValue: 1,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        6,
+		Category:    2,
+		ObjectId:    1057,
+		ObjectValue: 2,
 	})
 	batch = append(batch, &model.HeroUpgradeReward{
 		HeroId:      int(heroId),
@@ -571,6 +690,158 @@ func RebuildHeroUpgradeRewardTable() {
 		Category:    3,
 		ObjectId:    int(enum.HeroPassive6),
 		ObjectValue: 2,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        9,
+		Category:    2,
+		ObjectId:    2055,
+		ObjectValue: 1,
+	})
+
+	service.InsertHeroUpgradeReward(batch)
+}
+
+func AddCardsReward() {
+	var heroId int64
+	var batch []*model.HeroUpgradeReward
+
+	heroId, _ = service.GetHeroId(0)
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        3,
+		Category:    2,
+		ObjectId:    34,
+		ObjectValue: 1,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        6,
+		Category:    2,
+		ObjectId:    1039,
+		ObjectValue: 2,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        9,
+		Category:    2,
+		ObjectId:    1040,
+		ObjectValue: 2,
+	})
+
+	heroId, _ = service.GetHeroId(1)
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        3,
+		Category:    2,
+		ObjectId:    1013,
+		ObjectValue: 2,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        6,
+		Category:    2,
+		ObjectId:    1015,
+		ObjectValue: 2,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        9,
+		Category:    2,
+		ObjectId:    1014,
+		ObjectValue: 1,
+	})
+
+	heroId, _ = service.GetHeroId(2)
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        3,
+		Category:    2,
+		ObjectId:    1046,
+		ObjectValue: 2,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        6,
+		Category:    2,
+		ObjectId:    1047,
+		ObjectValue: 2,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        9,
+		Category:    2,
+		ObjectId:    1048,
+		ObjectValue: 1,
+	})
+
+	heroId, _ = service.GetHeroId(3)
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        3,
+		Category:    2,
+		ObjectId:    1024,
+		ObjectValue: 2,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        6,
+		Category:    2,
+		ObjectId:    2023,
+		ObjectValue: 2,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        9,
+		Category:    2,
+		ObjectId:    2024,
+		ObjectValue: 1,
+	})
+
+	heroId, _ = service.GetHeroId(4)
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        3,
+		Category:    2,
+		ObjectId:    1004,
+		ObjectValue: 2,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        6,
+		Category:    2,
+		ObjectId:    2,
+		ObjectValue: 1,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        9,
+		Category:    2,
+		ObjectId:    2003,
+		ObjectValue: 2,
+	})
+
+	heroId, _ = service.GetHeroId(5)
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        3,
+		Category:    2,
+		ObjectId:    1053,
+		ObjectValue: 2,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        6,
+		Category:    2,
+		ObjectId:    1057,
+		ObjectValue: 2,
+	})
+	batch = append(batch, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        9,
+		Category:    2,
+		ObjectId:    2055,
+		ObjectValue: 1,
 	})
 
 	service.InsertHeroUpgradeReward(batch)

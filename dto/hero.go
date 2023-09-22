@@ -7,4 +7,5 @@ type HeroInfo struct {
 	UserHeroProperty
 	Speciality []*UserHeroSpeciality
 	Passive    []*UserHeroPassive
+	CardInfo   map[int64]CardInfo
 }

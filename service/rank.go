@@ -117,8 +117,16 @@ func receiveReward(userId int64, reward model.HeroUpgradeReward) error {
 		if err != nil {
 			return err
 		}
-	case 2: // 卡牌[暂无]
-		return nil
+	case 2: // 卡牌
+		err := InsertOrUpdateUserHeroCards(session, &model.UserHeroCards{
+			UserId:         userId,
+			HeroId:         int64(reward.HeroId),
+			HeroCardId:     int64(reward.ObjectId),
+			UnlockQuantity: reward.ObjectValue,
+		})
+		if err != nil {
+			return err
+		}
 	case 3: // 被动
 		// 根据英雄Id和被动资源ID获取数据库中的被动
 		passive := new(model.Passive)

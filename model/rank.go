@@ -24,7 +24,7 @@ type HeroUpgradeReward struct {
 	Category    int       `xorm:"notnull"`        // 奖励分类 1专长 2卡牌 3被动  4自定义属性点
 	Type        int       `xorm:"'type'"`         // 特殊分类类型 4自定义属性点(1生命,2理智,3力量,4敏捷,5知识,6意志)
 	ObjectId    int       `xorm:"'object_id'"`    // 对象ID(分类为专长 卡牌 被动时使用)
-	ObjectValue int       `xorm:"'object_value'"` // 对象值(自定义属性点取值该字段)或者是专长或卡牌的层级
+	ObjectValue int       `xorm:"'object_value'"` // 对象值(自定义属性点取值该字段)或者是专长或卡牌的层级或者是卡牌解锁张数
 	CreatedAt   time.Time `xorm:"created"`        // 创建时间
 	UpdatedAt   time.Time `xorm:"updated"`        // 修改时间
 }
