@@ -90,11 +90,6 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 	if err != nil {
 		return nil, err
 	}
-	// 获取卡牌
-	cardsInfo, err := GetUserHeroCardsInfo(session, userId, heroId)
-	if err != nil {
-		return nil, err
-	}
 
 	result := &dto.HeroInfo{
 		HeroId: heroProperty.ResourceId,
@@ -120,18 +115,10 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 		},
 		Speciality: make([]*dto.UserHeroSpeciality, 0),
 		Passive:    make([]*dto.UserHeroPassive, 0),
-		CardInfo:   make(map[int64]dto.CardInfo),
 	}
 
 	result.Speciality = specialities
 	result.Passive = passives
-
-	for _, cardUnlockInfo := range cardsInfo {
-		result.CardInfo[cardUnlockInfo.CardId] = dto.CardInfo{
-			CardId: cardUnlockInfo.CardId,
-			Number: int32(cardUnlockInfo.UnlockQuantity),
-		}
-	}
 
 	err = session.Commit()
 	if err != nil {

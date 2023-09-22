@@ -120,8 +120,7 @@ func receiveReward(userId int64, reward model.HeroUpgradeReward) error {
 	case 2: // 卡牌
 		err := InsertOrUpdateUserHeroCards(session, &model.UserHeroCards{
 			UserId:         userId,
-			HeroId:         int64(reward.HeroId),
-			HeroCardId:     int64(reward.ObjectId),
+			CardId:         int64(reward.ObjectId),
 			UnlockQuantity: reward.ObjectValue,
 		})
 		if err != nil {

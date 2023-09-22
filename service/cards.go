@@ -1,37 +1,27 @@
 package service
 
 import (
+	"errors"
 	"github.com/go-xorm/xorm"
 	"github.com/youngpto/zgz-db/base"
+	"github.com/youngpto/zgz-db/dto"
 	"github.com/youngpto/zgz-db/model"
 	"xorm.io/builder"
 )
 
-func DropAllHeroCards() {
-	_, _ = base.Engine.
-		Where("1=1").
-		Delete(new(model.HeroCards))
-}
-
-func InsertHeroCards(cards []*model.HeroCards) {
-	_, _ = base.Engine.Insert(&cards)
-}
-
 func InsertOrUpdateUserHeroCards(session *xorm.Session, cards *model.UserHeroCards) error {
 	exist, err := session.Table("user_hero_cards").
 		Where(builder.Eq{
-			"user_id":      cards.UserId,
-			"hero_id":      cards.HeroId,
-			"hero_card_id": cards.HeroCardId,
+			"user_id": cards.UserId,
+			"card_id": cards.CardId,
 		}).Exist()
 	if err != nil {
 		return err
 	}
 	if exist {
 		_, err := session.Where(builder.Eq{
-			"user_id":      cards.UserId,
-			"hero_id":      cards.HeroId,
-			"hero_card_id": cards.HeroCardId,
+			"user_id": cards.UserId,
+			"card_id": cards.CardId,
 		}).MustCols("unlock_quantity").
 			Update(&model.UserHeroCards{
 				UnlockQuantity: cards.UnlockQuantity,
@@ -42,8 +32,7 @@ func InsertOrUpdateUserHeroCards(session *xorm.Session, cards *model.UserHeroCar
 	} else {
 		_, err := session.Insert(&model.UserHeroCards{
 			UserId:         cards.UserId,
-			HeroId:         cards.HeroId,
-			HeroCardId:     cards.HeroCardId,
+			CardId:         cards.CardId,
 			UnlockQuantity: cards.UnlockQuantity,
 		})
 		if err != nil {
@@ -53,15 +42,31 @@ func InsertOrUpdateUserHeroCards(session *xorm.Session, cards *model.UserHeroCar
 	return nil
 }
 
-// GetUserHeroCardsInfo 获取玩家英雄卡牌信息
-func GetUserHeroCardsInfo(session *xorm.Session, userId int64, heroId int64) ([]model.UserHeroCardUnlockInfo, error) {
-	var result []model.UserHeroCardUnlockInfo
-	err := session.Table("hero_cards").Alias("hc").
-		Join("LEFT", []string{"user_hero_cards", "uhc"}, "hc.id = uhc.hero_card_id").
-		Where("hc.hero_id = ? AND uhc.user_id = ?", heroId, userId).
-		Find(&result)
-	if err != nil {
-		return nil, err
+// AllExistInUserCards 传入的卡牌玩家是否都拥有
+func AllExistInUserCards(userId int64, cards []dto.CardInfo) (bool, error) {
+	session := base.Engine.NewSession()
+	defer session.Close()
+
+	if err := session.Begin(); err != nil {
+		return false, err
 	}
-	return result, nil
+
+	for _, card := range cards {
+		mCard := new(model.UserHeroCards)
+		_, err := session.Where(builder.Eq{
+			"user_id": userId,
+			"card_id": card.CardId,
+		}).Get(mCard)
+		if err != nil {
+			return false, err
+		}
+		if mCard.UnlockQuantity < int(card.Number) {
+			return false, errors.New("存在非法卡牌")
+		}
+	}
+	err := session.Commit()
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
