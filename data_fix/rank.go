@@ -1,10 +1,60 @@
 package data_fix
 
 import (
+	"fmt"
+	"github.com/youngpto/zgz-db/api"
+	"github.com/youngpto/zgz-db/base"
 	"github.com/youngpto/zgz-db/enum"
 	"github.com/youngpto/zgz-db/model"
 	"github.com/youngpto/zgz-db/service"
+	"runtime"
+	"sync"
+	"sync/atomic"
+	"xorm.io/builder"
 )
+
+func InitReleaseRank() {
+	// 获取用户总量
+	var workGoroutine int32 = 0
+	count, _ := base.Engine.
+		Where(builder.Gte{"tmp_achieve_num": 1}).
+		Count(new(model.User))
+	pageSize := 50 // 每次读取50个用户id
+	pageCount := int(count) / pageSize
+	if int(count)%pageSize > 1 {
+		pageCount++
+	}
+
+	var wg sync.WaitGroup
+	for i := 0; i < pageCount; i++ {
+		for atomic.LoadInt32(&workGoroutine) >= 50 {
+			runtime.Gosched()
+		}
+		wg.Add(1)
+		atomic.AddInt32(&workGoroutine, 1)
+		go func(pc int) {
+			defer wg.Done()
+			defer atomic.AddInt32(&workGoroutine, -1)
+			_ = base.Engine.
+				Where(builder.Gte{"tmp_achieve_num": 1}).
+				Limit(pageSize, pc*pageSize).
+				Iterate(new(model.User), func(idx int, bean interface{}) error {
+					user := bean.(*model.User)
+					for i := 0; i < 6; i++ {
+						_, ch, _ := api.HeroGainExperience(user.Id, int64(i), float64(200*user.TmpAchieveNum))
+						for i2 := range ch {
+							if i2 == 0 {
+								fmt.Println("ERROR Exp")
+							}
+						}
+					}
+					return nil
+				})
+			fmt.Println(pc+1, "/", pageCount, "已完成")
+		}(i)
+	}
+	wg.Done()
+}
 
 func RebuildRankTable() {
 	service.DropAllRank()

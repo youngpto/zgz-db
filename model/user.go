@@ -3,10 +3,11 @@ package model
 import "time"
 
 type User struct {
-	Id        int64     `xorm:"pk autoincr"` // 主键
-	Name      string    `xorm:"notnull"`     // 用户名
-	CreatedAt time.Time `xorm:"created"`     // 创建时间
-	UpdatedAt time.Time `xorm:"updated"`     // 修改时间
+	Id            int64     `xorm:"pk autoincr"`       // 主键
+	Name          string    `xorm:"notnull"`           // 用户名
+	TmpAchieveNum int       `xorm:"'tmp_achieve_num'"` // 统计steam成就数量
+	CreatedAt     time.Time `xorm:"created"`           // 创建时间
+	UpdatedAt     time.Time `xorm:"updated"`           // 修改时间
 }
 
 func (u *User) TableName() string {

@@ -85,6 +85,35 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 	if err != nil {
 		return nil, err
 	}
+	haveDefaultSpeciality := false
+	for _, speciality := range specialities {
+		if speciality.Level == 1 {
+			haveDefaultSpeciality = true
+			break
+		}
+	}
+	if !haveDefaultSpeciality {
+		var userHeroSpecialityRuleList []model.SpecialityRule
+		err = session.Table("speciality_rule").
+			Where("hero_id = ? AND level = ?", heroId, 1).
+			Find(&userHeroSpecialityRuleList)
+		if err != nil {
+			return nil, err
+		}
+		err := UpdateTakeAlongFormUserSpecialityByLevel(&model.UserSpeciality{
+			UserId:       userId,
+			HeroId:       heroId,
+			Level:        1,
+			SpecialityId: userHeroSpecialityRuleList[0].SpecialityId,
+		})
+		if err != nil {
+			return nil, err
+		}
+		specialities, err = FindAllUserSpecialityByUserAndHero(userId, heroId)
+		if err != nil {
+			return nil, err
+		}
+	}
 	// 获取被动
 	passives, err := FindAllUserPassiveByUser(userId, heroId)
 	if err != nil {

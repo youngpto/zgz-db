@@ -6,6 +6,9 @@ import (
 	"github.com/youngpto/zgz-db/enum"
 	"github.com/youngpto/zgz-db/model"
 	"github.com/youngpto/zgz-db/service"
+	"runtime"
+	"sync"
+	"sync/atomic"
 )
 
 // RebuildUserSpecial 重建用户专长表
@@ -40,32 +43,44 @@ func RebuildUserSpecial() {
 	sidList[heroId] = sId
 
 	// 获取用户总量
+	var workGoroutine int32 = 0
 	count, _ := base.Engine.Count(new(model.User))
-	pageSize := 100 // 每次读取100个用户id
+	pageSize := 50 // 每次读取50个用户id
 	pageCount := int(count) / pageSize
 	if int(count)%pageSize > 1 {
 		pageCount++
 	}
 
+	var wg sync.WaitGroup
 	for i := 0; i < pageCount; i++ {
-		_ = base.Engine.Cols("id").
-			Limit(pageSize, i*pageSize).
-			Iterate(new(model.User), func(idx int, bean interface{}) error {
-				user := bean.(*model.User)
-				var batch []*model.UserSpeciality
-				for heroId, sid := range sidList {
-					batch = append(batch, &model.UserSpeciality{
-						UserId:       user.Id,
-						HeroId:       heroId,
-						Level:        1,
-						SpecialityId: sid,
-					})
-				}
-				service.InsertUserSpeciality(batch)
-				return nil
-			})
-		fmt.Println(i+1, "====>", pageCount)
+		for atomic.LoadInt32(&workGoroutine) >= 50 {
+			runtime.Gosched()
+		}
+		wg.Add(1)
+		atomic.AddInt32(&workGoroutine, 1)
+		go func(pc int) {
+			defer wg.Done()
+			defer atomic.AddInt32(&workGoroutine, -1)
+			_ = base.Engine.Cols("id").
+				Limit(pageSize, pc*pageSize).
+				Iterate(new(model.User), func(idx int, bean interface{}) error {
+					user := bean.(*model.User)
+					var batch []*model.UserSpeciality
+					for heroId, sid := range sidList {
+						batch = append(batch, &model.UserSpeciality{
+							UserId:       user.Id,
+							HeroId:       heroId,
+							Level:        1,
+							SpecialityId: sid,
+						})
+					}
+					service.InsertUserSpeciality(batch)
+					return nil
+				})
+			fmt.Println(pc+1, "/", pageCount, "已完成")
+		}(i)
 	}
+	wg.Done()
 }
 
 // RebuildSpecialRuleTable 重建专长规则表

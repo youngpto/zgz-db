@@ -36,8 +36,8 @@ func FixHeroBaseProperty() {
 		Reason:    9,
 		Power:     2,
 		Agile:     2,
-		Knowledge: 3,
-		Will:      5,
+		Knowledge: 5,
+		Will:      3,
 	})
 	service.UpdateHeroBaseProperty(4, &model.HeroProperty{
 		Life:      8,
