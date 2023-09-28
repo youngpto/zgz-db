@@ -68,7 +68,7 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 	var ranks []model.Rank
 	//_, err = session.Where(builder.Eq{"rank": userHeroRankAndPropertyOffset.Rank}).
 	err = session.
-		Cols("experience").
+		Cols("rank", "experience").
 		Find(&ranks)
 	if err != nil {
 		return nil, err
