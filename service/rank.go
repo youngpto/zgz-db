@@ -18,11 +18,19 @@ func InsertRank(rank []*model.Rank) {
 // FindRankGTELevel 获取大于等于当前等级的升级路线
 func FindRankGTELevel(currentLevel int) ([]model.Rank, error) {
 	var result []model.Rank
-	err := base.Engine.Where(builder.Gte{"rank": currentLevel}).
+	//err := base.Engine.Where(builder.Gt{"rank": currentLevel}.Or(builder.Eq{"rank": currentLevel})).
+	err := base.Engine.
 		Cols("rank", "experience").
 		Find(&result)
 	if err != nil {
 		return nil, err
+	}
+	for i := 0; i < len(result); i++ {
+		rank := result[i]
+		if rank.Rank < currentLevel {
+			result = append(result[:i], result[i+1:]...)
+			i--
+		}
 	}
 	return result, nil
 }
@@ -60,12 +68,22 @@ func FindUnclaimedRankReward(userId int64, webHeroId int, currentRank int) ([]mo
 	}
 
 	var result []model.HeroUpgradeReward
+	//err = session.Where(builder.Eq{"hero_id": webHeroId}.
+	//	And(builder.Lte{"rank": currentRank}.
+	//		And(builder.NotIn("id", claimedIds)))).
+	//	Find(&result)
 	err = session.Where(builder.Eq{"hero_id": webHeroId}.
-		And(builder.Lte{"rank": currentRank}.
-			And(builder.NotIn("id", claimedIds)))).
+		And(builder.NotIn("id", claimedIds))).
 		Find(&result)
 	if err != nil {
 		return nil, err
+	}
+	for i := 0; i < len(result); i++ {
+		rank := result[i]
+		if rank.Rank > currentRank {
+			result = append(result[:i], result[i+1:]...)
+			i--
+		}
 	}
 
 	err = session.Commit()

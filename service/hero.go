@@ -65,12 +65,19 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 		return nil, err
 	}
 	// 根据等级查询当前经验值上限
-	rank := model.Rank{}
-	_, err = session.Where(builder.Eq{"rank": userHeroRankAndPropertyOffset.Rank}).
+	var ranks []model.Rank
+	//_, err = session.Where(builder.Eq{"rank": userHeroRankAndPropertyOffset.Rank}).
+	err = session.
 		Cols("experience").
-		Get(&rank)
+		Find(&ranks)
 	if err != nil {
 		return nil, err
+	}
+	var rank model.Rank
+	for i := 0; i < len(ranks); i++ {
+		if ranks[i].Rank == userHeroRankAndPropertyOffset.Rank {
+			rank = ranks[i]
+		}
 	}
 	// 根据HeroID查询英雄基础属性
 	heroProperty := model.HeroProperty{}
