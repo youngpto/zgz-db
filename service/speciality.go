@@ -147,18 +147,31 @@ func UpdateTakeAlongFormUserSpecialityByLevel(speciality *model.UserSpeciality) 
 		if err != nil {
 			return err
 		}
-
-	}
-	_, err = session.
-		Where(builder.Eq{
-			"user_id":       speciality.UserId,
-			"hero_id":       speciality.HeroId,
-			"level":         speciality.Level,
-			"speciality_id": speciality.SpecialityId,
-		}).MustCols("take_along").
-		Update(&model.UserSpeciality{
-			TakeAlong: true,
+		_, err = session.
+			Where(builder.Eq{
+				"user_id":       speciality.UserId,
+				"hero_id":       speciality.HeroId,
+				"level":         speciality.Level,
+				"speciality_id": speciality.SpecialityId,
+			}).MustCols("take_along").
+			Update(&model.UserSpeciality{
+				TakeAlong: true,
+			})
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err = session.Insert(&model.UserSpeciality{
+			UserId:       speciality.UserId,
+			HeroId:       speciality.HeroId,
+			Level:        speciality.Level,
+			SpecialityId: speciality.SpecialityId,
+			TakeAlong:    true,
 		})
+		if err != nil {
+			return err
+		}
+	}
 	if err != nil {
 		return err
 	}
