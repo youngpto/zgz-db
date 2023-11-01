@@ -51,8 +51,9 @@ func InitOrm(opts ...MysqlOption) error {
 		fmt.Println("zgz-db-utils 初始化失败")
 		return err
 	}
-	engine.SetMaxIdleConns(5)
-	engine.SetMaxOpenConns(20)
+	engine.SetMaxIdleConns(20)
+	engine.SetMaxOpenConns(1000)
+	engine.ShowSQL(true)
 	Engine = engine
 	fmt.Println("zgz-db-utils 初始化成功")
 	return nil

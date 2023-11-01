@@ -14,14 +14,15 @@ func SetUserSpeciality(userId int64, resourceHeroId int64, level int, resourceSp
 		return nil, err
 	}
 	if resourceSpecialityId == -1 {
-		err := service.CancelTakeAlongUserSpecialityByLevel(&model.UserSpeciality{
-			UserId: userId,
-			HeroId: heroId,
-			Level:  level,
-		})
-		if err != nil {
-			return nil, err
-		}
+		return nil, nil
+		//err := service.CancelTakeAlongUserSpecialityByLevel(&model.UserSpeciality{
+		//	UserId: userId,
+		//	HeroId: heroId,
+		//	Level:  level,
+		//})
+		//if err != nil {
+		//	return nil, err
+		//}
 	} else {
 		specialityId, err := service.GetHeroSpecialityId(int(heroId), int(resourceSpecialityId))
 		if err != nil {

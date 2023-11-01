@@ -64,6 +64,16 @@ func InsertUserSpeciality(batch []*model.UserSpeciality) {
 
 // InsertNotExistUserSpeciality 不重复插入玩家专长
 func InsertNotExistUserSpeciality(session *xorm.Session, speciality *model.UserSpeciality) (bool, error) {
+	// 默认配置一个专长
+	exist, _ := session.Where(builder.Eq{
+		"user_id":    speciality.UserId,
+		"level":      speciality.Level,
+		"hero_id":    speciality.HeroId,
+		"take_along": true,
+	}).Exist(new(model.UserSpeciality))
+	if !exist {
+		speciality.TakeAlong = true
+	}
 	exist, err := session.Where(builder.Eq{
 		"user_id":       speciality.UserId,
 		"level":         speciality.Level,

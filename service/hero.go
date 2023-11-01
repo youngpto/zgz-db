@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/youngpto/zgz-db/base"
 	"github.com/youngpto/zgz-db/dto"
+	"github.com/youngpto/zgz-db/enum"
 	"github.com/youngpto/zgz-db/model"
 	"xorm.io/builder"
 )
@@ -157,6 +158,27 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 	result.Passive = passives
 
 	err = session.Commit()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func InsertHero(batch []*model.Hero) error {
+	_, err := base.Engine.Insert(&batch)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// GetAllowHeroByUser 获取玩家可用英雄
+func GetAllowHeroByUser(userId int64) ([]enum.HeroResource, error) {
+	var result []enum.HeroResource
+	err := base.Engine.Table("user_hero").Alias("uh").
+		Join("LEFT", []string{"hero", "h"}, "uh.hero_id = h.id").
+		Where("uh.user_id = ?", userId).
+		Cols("h.resource_id").Find(&result)
 	if err != nil {
 		return nil, err
 	}
