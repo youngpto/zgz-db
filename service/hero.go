@@ -110,7 +110,7 @@ func GetPropertyAndPassiveAndSpecialityByUser(userId int64, heroId int64) (*dto.
 	}
 	haveDefaultSpeciality := false
 	for _, speciality := range specialities {
-		if speciality.Level == 1 {
+		if speciality.Level == 1 && speciality.TakeAlongSpecialityResourceId != -1 {
 			haveDefaultSpeciality = true
 			break
 		}
