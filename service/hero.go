@@ -34,6 +34,21 @@ func GetAllHeroByUser(userId int64) ([]model.UserHeroRank, error) {
 	return result, nil
 }
 
+var allHero []model.Hero = nil
+
+// GetAllHero 获取所有英雄
+func GetAllHero() ([]model.Hero, error) {
+	if len(allHero) == 0 {
+		var result []model.Hero
+		err := base.Engine.Find(&result)
+		if err != nil {
+			return nil, err
+		}
+		allHero = result
+	}
+	return allHero, nil
+}
+
 // GetUserHeroRankInfo 获取玩家对应英雄的等级情况
 func GetUserHeroRankInfo(userId int64, heroId int64) (*model.UserHeroRank, error) {
 	result := new(model.UserHeroRank)

@@ -28,5 +28,41 @@ func GetUserAllHeroGrowthAttribute(userId int64) ([]*dto.HeroInfo, error) {
 		}
 		result = append(result, heroInfo)
 	}
+
+	// 获取玩家未解锁的英雄
+	heros, err := service.GetAllHero()
+	if err != nil {
+		return nil, err
+	}
+H:
+	for _, hero := range heros {
+		for _, info := range result {
+			if int64(info.HeroId) == hero.Id {
+				continue H
+			}
+		}
+		specialities, err := service.FindAllUserSpecialityByUserAndHero(userId, hero.Id)
+		if err != nil {
+			return nil, err
+		}
+		passives, err := service.FindAllUserPassiveByUser(userId, hero.Id)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &dto.HeroInfo{
+			HeroId:            int(hero.ResourceId),
+			GainExperienceRes: dto.GainExperienceRes{},
+			UserHeroProperty: dto.UserHeroProperty{
+				BaseHp:        int32(hero.Life),
+				BaseSan:       int32(hero.Reason),
+				BaseStrength:  int32(hero.Power),
+				BaseAgility:   int32(hero.Agile),
+				BaseKnowledge: int32(hero.Knowledge),
+				BaseWillPower: int32(hero.Will),
+			},
+			Speciality: specialities,
+			Passive:    passives,
+		})
+	}
 	return result, nil
 }
