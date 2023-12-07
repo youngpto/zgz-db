@@ -52,21 +52,42 @@ func AllExistInUserCards(userId int64, cards []dto.CardInfo) (bool, error) {
 	}
 
 	for _, card := range cards {
-		mCard := new(model.UserHeroCards)
-		_, err := session.Where(builder.Eq{
+		exist, err := session.Where(builder.Eq{
 			"user_id": userId,
 			"card_id": card.CardId,
-		}).Get(mCard)
+		}).Exist(new(model.UserHeroCards))
 		if err != nil {
 			return false, err
 		}
-		if mCard.UnlockQuantity < int(card.Number) {
+		if !exist {
 			return false, errors.New("存在非法卡牌")
 		}
+		//mCard := new(model.UserHeroCards)
+		//_, err := session.Where(builder.Eq{
+		//	"user_id": userId,
+		//	"card_id": card.CardId,
+		//}).Get(mCard)
+		//if err != nil {
+		//	return false, err
+		//}
+		//if mCard.UnlockQuantity < int(card.Number) {
+		//	return false, errors.New("存在非法卡牌")
+		//}
 	}
 	err := session.Commit()
 	if err != nil {
 		return false, err
 	}
 	return true, nil
+}
+
+func GetUserCards(userId int64) ([]model.UserHeroCards, error) {
+	var result []model.UserHeroCards
+	err := base.Engine.
+		Where(builder.Eq{"user_id": userId}).
+		Find(&result)
+	if err != nil {
+		return nil, err
+	}
+	return result, err
 }
