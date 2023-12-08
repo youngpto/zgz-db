@@ -37,7 +37,7 @@ func GetUserAllHeroGrowthAttribute(userId int64) ([]*dto.HeroInfo, error) {
 H:
 	for _, hero := range heros {
 		for _, info := range result {
-			if int64(info.HeroId) == hero.Id {
+			if int(info.HeroId) == hero.ResourceId {
 				continue H
 			}
 		}
