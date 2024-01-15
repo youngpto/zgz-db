@@ -395,3 +395,329 @@ func UpdateMercenaryInfo() {
 	})
 	service.InsertHeroUpgradeReward(batchHeroUpgradeReward)
 }
+
+func InsertHoundHero() error {
+	err := service.InsertHero([]*model.Hero{
+		{
+			ResourceId: int(enum.Hound),
+			Name:       "猎犬",
+			CodeName:   "hound",
+			Life:       5,
+			Reason:     9,
+			Power:      2,
+			Agile:      3,
+			Knowledge:  3,
+			Will:       4,
+			Config:     "{\n    \"hero_id\": 8,\n    \"m_cardDeckId\": 1,\n    \"m_cardDeckName\": \"Default\",\n    \"m_serverId\": 0,\n    \"m_cardDeckList\": {\n        \"data\": [\n            {\n                \"m_id\": 71,\n                \"m_cardCount\": 1\n            },\n            {\n                \"m_id\": 72,\n                \"m_cardCount\": 1\n            },\n            {\n                \"m_id\": 183,\n                \"m_cardCount\": 1\n            },\n            {\n                \"m_id\": 300,\n                \"m_cardCount\": 1\n            },\n            {\n                \"m_id\": 305,\n                \"m_cardCount\": 1\n            },\n            {\n                \"m_id\": 309,\n                \"m_cardCount\": 1\n            },\n            {\n                \"m_id\": 1071,\n                \"m_cardCount\": 2\n            },\n            {\n                \"m_id\": 1072,\n                \"m_cardCount\": 2\n            },\n            {\n                \"m_id\": 1110,\n                \"m_cardCount\": 2\n            },\n            {\n                \"m_id\": 1184,\n                \"m_cardCount\": 2\n            },\n            {\n                \"m_id\": 1185,\n                \"m_cardCount\": 2\n            },\n            {\n                \"m_id\": 1303,\n                \"m_cardCount\": 2\n            },\n            {\n                \"m_id\": 1309,\n                \"m_cardCount\": 2\n            },\n            {\n                \"m_id\": 2071,\n                \"m_cardCount\": 2\n            },\n            {\n                \"m_id\": 2072,\n                \"m_cardCount\": 2\n            },\n            {\n                \"m_id\": 2104,\n                \"m_cardCount\": 2\n            },\n            {\n                \"m_id\": 2301,\n                \"m_cardCount\": 2\n            },\n            {\n                \"m_id\": 2305,\n                \"m_cardCount\": 2\n            }\n        ]\n    }\n}\n",
+		},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateHoundHeroConfig() error {
+	heroId, err := service.GetHeroId(int64(enum.Hound))
+	if err != nil {
+		return err
+	}
+	err = service.UpdateHeroInfo(heroId, &model.Hero{
+		Config: "",
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateHoundRankInfo() error {
+	heroId, err := service.GetHeroId(int64(enum.Hound))
+	if err != nil {
+		return err
+	}
+
+	// 更新专长表
+	var batchSpeciality []*model.Speciality
+	batchSpeciality = append(batchSpeciality, &model.Speciality{
+		ResourceId:  int(enum.SpecialityVerbalTrick),
+		HeroId:      int(heroId),
+		Name:        "话术",
+		Desc:        "话术",
+		EnglishName: "话术",
+		EnglishDesc: "话术",
+	})
+	batchSpeciality = append(batchSpeciality, &model.Speciality{
+		ResourceId:  int(enum.SpecialityPerformance),
+		HeroId:      int(heroId),
+		Name:        "表演",
+		Desc:        "表演",
+		EnglishName: "表演",
+		EnglishDesc: "表演",
+	})
+	batchSpeciality = append(batchSpeciality, &model.Speciality{
+		ResourceId:  int(enum.SpecialityCraftyHand),
+		HeroId:      int(heroId),
+		Name:        "巧手",
+		Desc:        "巧手",
+		EnglishName: "巧手",
+		EnglishDesc: "巧手",
+	})
+	batchSpeciality = append(batchSpeciality, &model.Speciality{
+		ResourceId:  int(enum.SpecialityMysterious),
+		HeroId:      int(heroId),
+		Name:        "神秘",
+		Desc:        "神秘",
+		EnglishName: "神秘",
+		EnglishDesc: "神秘",
+	})
+	batchSpeciality = append(batchSpeciality, &model.Speciality{
+		ResourceId:  int(enum.SpecialityNature),
+		HeroId:      int(heroId),
+		Name:        "自然",
+		Desc:        "自然",
+		EnglishName: "自然",
+		EnglishDesc: "自然",
+	})
+	service.InsertSpeciality(batchSpeciality)
+
+	// 更新专长规则表
+	var batchSpecialityRule []*model.SpecialityRule
+	var sId int64
+	sId, _ = service.GetHeroSpecialityId(int(heroId), int(enum.SpecialityVerbalTrick))
+	batchSpecialityRule = append(batchSpecialityRule, &model.SpecialityRule{
+		HeroId:       int(heroId),
+		Level:        1,
+		SpecialityId: sId,
+	})
+	sId, _ = service.GetHeroSpecialityId(int(heroId), int(enum.SpecialityPerformance))
+	batchSpecialityRule = append(batchSpecialityRule, &model.SpecialityRule{
+		HeroId:       int(heroId),
+		Level:        2,
+		SpecialityId: sId,
+	})
+	sId, _ = service.GetHeroSpecialityId(int(heroId), int(enum.SpecialityCraftyHand))
+	batchSpecialityRule = append(batchSpecialityRule, &model.SpecialityRule{
+		HeroId:       int(heroId),
+		Level:        2,
+		SpecialityId: sId,
+	})
+	sId, _ = service.GetHeroSpecialityId(int(heroId), int(enum.SpecialityMysterious))
+	batchSpecialityRule = append(batchSpecialityRule, &model.SpecialityRule{
+		HeroId:       int(heroId),
+		Level:        3,
+		SpecialityId: sId,
+	})
+	sId, _ = service.GetHeroSpecialityId(int(heroId), int(enum.SpecialityNature))
+	batchSpecialityRule = append(batchSpecialityRule, &model.SpecialityRule{
+		HeroId:       int(heroId),
+		Level:        3,
+		SpecialityId: sId,
+	})
+	service.InsertSpecialityRule(batchSpecialityRule)
+
+	// 更新被动表
+	var text = []string{"手牌上限+3。", "开局受到1点伤害、1点恐惧，额外抽3牌。",
+		"开局时，将1张<逢凶化吉>加入你的手牌。", "开局受到1点伤害、1点恐惧，装备槽+1。",
+		"你的首个回合开始时，从卡组检索1牌。", "每局首次被击败时，保留1点生命/理智。"}
+	var batchPassive []*model.Passive
+	batchPassive = append(batchPassive, &model.Passive{
+		ResourceId:  int(enum.HeroPassive1),
+		HeroId:      int(heroId),
+		Name:        text[0],
+		Desc:        text[0],
+		EnglishName: text[0],
+		EnglishDesc: text[0],
+	})
+	batchPassive = append(batchPassive, &model.Passive{
+		ResourceId:  int(enum.HeroPassive2),
+		HeroId:      int(heroId),
+		Name:        text[1],
+		Desc:        text[1],
+		EnglishName: text[1],
+		EnglishDesc: text[1],
+	})
+	batchPassive = append(batchPassive, &model.Passive{
+		ResourceId:  int(enum.HeroPassive3),
+		HeroId:      int(heroId),
+		Name:        text[2],
+		Desc:        text[2],
+		EnglishName: text[2],
+		EnglishDesc: text[2],
+	})
+	batchPassive = append(batchPassive, &model.Passive{
+		ResourceId:  int(enum.HeroPassive4),
+		HeroId:      int(heroId),
+		Name:        text[3],
+		Desc:        text[3],
+		EnglishName: text[3],
+		EnglishDesc: text[3],
+	})
+	batchPassive = append(batchPassive, &model.Passive{
+		ResourceId:  int(enum.HeroPassive5),
+		HeroId:      int(heroId),
+		Name:        text[4],
+		Desc:        text[4],
+		EnglishName: text[4],
+		EnglishDesc: text[4],
+	})
+	batchPassive = append(batchPassive, &model.Passive{
+		ResourceId:  int(enum.HeroPassive6),
+		HeroId:      int(heroId),
+		Name:        text[5],
+		Desc:        text[5],
+		EnglishName: text[5],
+		EnglishDesc: text[5],
+	})
+	service.InsertPassive(batchPassive)
+
+	// 更新被动规则表
+	var batchPassiveRule []*model.PassiveRule
+	var pId int64
+	pId, _ = service.GetHeroPassiveId(int(heroId), int(enum.HeroPassive1))
+	batchPassiveRule = append(batchPassiveRule, &model.PassiveRule{
+		HeroId:    int(heroId),
+		Level:     1,
+		PassiveId: pId,
+	})
+	pId, _ = service.GetHeroPassiveId(int(heroId), int(enum.HeroPassive2))
+	batchPassiveRule = append(batchPassiveRule, &model.PassiveRule{
+		HeroId:    int(heroId),
+		Level:     1,
+		PassiveId: pId,
+	})
+	pId, _ = service.GetHeroPassiveId(int(heroId), int(enum.HeroPassive3))
+	batchPassiveRule = append(batchPassiveRule, &model.PassiveRule{
+		HeroId:    int(heroId),
+		Level:     1,
+		PassiveId: pId,
+	})
+	pId, _ = service.GetHeroPassiveId(int(heroId), int(enum.HeroPassive4))
+	batchPassiveRule = append(batchPassiveRule, &model.PassiveRule{
+		HeroId:    int(heroId),
+		Level:     2,
+		PassiveId: pId,
+	})
+	pId, _ = service.GetHeroPassiveId(int(heroId), int(enum.HeroPassive5))
+	batchPassiveRule = append(batchPassiveRule, &model.PassiveRule{
+		HeroId:    int(heroId),
+		Level:     2,
+		PassiveId: pId,
+	})
+	pId, _ = service.GetHeroPassiveId(int(heroId), int(enum.HeroPassive6))
+	batchPassiveRule = append(batchPassiveRule, &model.PassiveRule{
+		HeroId:    int(heroId),
+		Level:     2,
+		PassiveId: pId,
+	})
+	service.InsertPassiveRule(batchPassiveRule)
+
+	// 更新升级奖励表
+	var batchHeroUpgradeReward []*model.HeroUpgradeReward
+	batchHeroUpgradeReward = append(batchHeroUpgradeReward, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        1,
+		Category:    1,
+		ObjectId:    int(enum.SpecialityPerformance),
+		ObjectValue: 2,
+	})
+	batchHeroUpgradeReward = append(batchHeroUpgradeReward, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        1,
+		Category:    1,
+		ObjectId:    int(enum.SpecialityCraftyHand),
+		ObjectValue: 2,
+	})
+	batchHeroUpgradeReward = append(batchHeroUpgradeReward, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        2,
+		Category:    4,
+		ObjectValue: 1,
+	})
+	batchHeroUpgradeReward = append(batchHeroUpgradeReward, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        3,
+		Category:    2,
+		ObjectId:    1074,
+		ObjectValue: 1,
+	})
+	batchHeroUpgradeReward = append(batchHeroUpgradeReward, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        4,
+		Category:    3,
+		ObjectId:    int(enum.HeroPassive1),
+		ObjectValue: 1,
+	})
+	batchHeroUpgradeReward = append(batchHeroUpgradeReward, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        4,
+		Category:    3,
+		ObjectId:    int(enum.HeroPassive2),
+		ObjectValue: 1,
+	})
+	batchHeroUpgradeReward = append(batchHeroUpgradeReward, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        4,
+		Category:    3,
+		ObjectId:    int(enum.HeroPassive3),
+		ObjectValue: 1,
+	})
+	batchHeroUpgradeReward = append(batchHeroUpgradeReward, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        5,
+		Category:    4,
+		ObjectValue: 1,
+	})
+	batchHeroUpgradeReward = append(batchHeroUpgradeReward, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        6,
+		Category:    2,
+		ObjectId:    1073,
+		ObjectValue: 2,
+	})
+	batchHeroUpgradeReward = append(batchHeroUpgradeReward, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        7,
+		Category:    1,
+		ObjectId:    int(enum.SpecialityMysterious),
+		ObjectValue: 3,
+	})
+	batchHeroUpgradeReward = append(batchHeroUpgradeReward, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        7,
+		Category:    1,
+		ObjectId:    int(enum.SpecialityNature),
+		ObjectValue: 3,
+	})
+	batchHeroUpgradeReward = append(batchHeroUpgradeReward, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        8,
+		Category:    3,
+		ObjectId:    int(enum.HeroPassive4),
+		ObjectValue: 2,
+	})
+	batchHeroUpgradeReward = append(batchHeroUpgradeReward, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        8,
+		Category:    3,
+		ObjectId:    int(enum.HeroPassive5),
+		ObjectValue: 2,
+	})
+	batchHeroUpgradeReward = append(batchHeroUpgradeReward, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        8,
+		Category:    3,
+		ObjectId:    int(enum.HeroPassive6),
+		ObjectValue: 2,
+	})
+	batchHeroUpgradeReward = append(batchHeroUpgradeReward, &model.HeroUpgradeReward{
+		HeroId:      int(heroId),
+		Rank:        9,
+		Category:    2,
+		ObjectId:    73,
+		ObjectValue: 2,
+	})
+	service.InsertHeroUpgradeReward(batchHeroUpgradeReward)
+
+	return nil
+}

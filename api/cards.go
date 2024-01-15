@@ -31,6 +31,8 @@ func GetUserCardsFromDLC(userId int64) ([]int32, error) {
 			continue
 		case 1053, 1057, 2055: // 小学生升级卡牌
 			continue
+		case 73, 1073, 1074: // 猎犬升级卡牌
+			continue
 		default:
 			result = append(result, int32(card.CardId))
 		}

@@ -10,4 +10,5 @@ const (
 	Police                        // 警察
 	Pupil                         // 小学生
 	Mercenary                     // 佣兵
+	Hound                         // 猎犬
 )

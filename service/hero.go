@@ -187,6 +187,14 @@ func InsertHero(batch []*model.Hero) error {
 	return nil
 }
 
+func UpdateHeroInfo(heroId int64, hero *model.Hero) error {
+	_, err := base.Engine.ID(heroId).Update(hero)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // GetAllowHeroByUser 获取玩家可用英雄
 func GetAllowHeroByUser(userId int64) ([]enum.HeroResource, error) {
 	var result []enum.HeroResource
